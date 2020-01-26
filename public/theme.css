@@ -1,0 +1,12 @@
+body {
+    box-sizing: border-box;
+}
+
+body * {
+    box-sizing: inherit;
+}
+
+p {
+    max-width: 60rem;
+    padding: 0 1em;
+}

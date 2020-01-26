@@ -1,9 +1,9 @@
 {
-  "name": "create-next-example-app",
-  "description": "A Next.js starter app.",
+  "name": "lorenzofox.com",
+  "description": "personal website",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zeit/now/tree/master/examples/nextjs"
+    "url": "https://github.com/lorenzofox3/lorenzofox"
   },
   "license": "MIT",
   "scripts": {
