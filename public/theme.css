@@ -1,5 +1,6 @@
 body {
     box-sizing: border-box;
+    --layout-padding: 1em
 }
 
 body * {
@@ -8,5 +9,20 @@ body * {
 
 p {
     max-width: 60rem;
-    padding: 0 1em;
+    line-height: 1.4;
+}
+
+p a {
+    background: #f0f0f0;
+    border-bottom: 2px solid coral;
+    color: #6b9beb;
+    text-decoration: none;
+}
+
+main {
+    padding: var(--layout-padding, 1em);
+}
+
+h1 {
+    align-self: flex-start;
 }
