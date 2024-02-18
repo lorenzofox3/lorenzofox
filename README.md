@@ -1,3 +1,0 @@
-# lorenzofox
-
-Personal website

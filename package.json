@@ -6,14 +6,6 @@
     "url": "https://github.com/lorenzofox3/lorenzofox"
   },
   "license": "MIT",
-  "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "next": "^9.1.6",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0"
-  }
+  "scripts": {},
+  "dependencies": {}
 }
