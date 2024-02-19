@@ -74,7 +74,7 @@ import {html} from 'lit-element';
 const template = ({name = ''} = {}) => html`<p>hello ${name}</p>`;
 ```
 
-And compose with a new combinator: 
+And compose with a new higher order function: 
 
 ```Javascript
 import {render} from 'lit-element';
@@ -124,10 +124,9 @@ const CountClick = createComponent(function *({$host}){
 
 In frameworks like React, where you only have access to the equivalent of what is inside the loop, you rely on the framework extension points (the hooks in the case of React) to build this sort of mechanism, and have very little control over rendering scheduling.
 
-## More function combinators to reduce the coupling. 
-
-The component embeds its view and some logic at the same time. Again, we can easily uncouple them so we could reuse either the view or the logic:
-It only requires us to take advantage of third properties of coroutine we mentioned in introduction, and a simple delegation mechanism inherent to generators
+## More HOF function to reduce the coupling. 
+The component embeds its view and some logic at the same time. Again, we can easily decouple them so that we can reuse either the view or the logic:
+All we need to do is take advantage of the third property of coroutines mentioned in the introduction, and a simple delegation mechanism inherent to generators.
 
 ```Javascript
 const countClickable = (view) => function *({$host}) {
@@ -142,7 +141,7 @@ const countClickable = (view) => function *({$host}) {
 }
 ```
 
-This sort of mixin is responsible to maintain the state and to trigger the rendering of any _view_. The rendering is let to the view thanks to **delegation** while the state is passed whenever the view coroutine is paused and requires a new rendering:
+This type of mixin is responsible for holding the state and triggering the rendering of any _view_. Rendering is left to the view thanks to **delegation**, while the state is passed whenever the view coroutine is paused and requires a new render:
 
 ```Javascript
 const CountClick = createComponent(countClickable(function* ({$host}) {
@@ -153,7 +152,9 @@ const CountClick = createComponent(countClickable(function* ({$host}) {
 }));
 ```
 
-We will see more combinators and patterns in future articles
+Neat ! You can now use the "clickable" behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data.
+
+We will see more patterns like this in future articles.
 
 ## Web components and lifecycle mapping
 
