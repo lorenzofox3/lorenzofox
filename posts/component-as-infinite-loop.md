@@ -1,14 +1,14 @@
 # Coroutines and web components
 
-In the [previous article](./coroutine) we learnt what coroutines are and saw some patterns they can help to implement.
-In this article, we are going to see how they can help us to model web components in a different way and why you could like it.
+In the [previous article](./coroutine) we learned what coroutines are and saw some patterns they can help implement.
+In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
 
 ## Rendering loop
 
-Coroutines have, among others, few properties we are going to use in this short essay:
-* They are before all **functions** and can benefit from the whole functional arsenal of Javascript (composition, higher order function, delegation, etc.)
-* They are **stateful**
-* You can inject pretty much any sort of data when they are paused. For instance an infinite loop within the body of the routine can be seen as a public function.
+Among other things, coroutines have a few properties that we will use in this short essay:
+* They are primarily **functions** and can benefit from the whole functional arsenal of Javascript (composition, higher order function, delegation, etc.).
+* They are **stateful**.
+* You can inject pretty much any kind of data when they are paused. For example, an infinite loop within the body of the routine can be considered as a public API function.
 * You cannot, by design, call the ``next`` function concurrently
 
 ## Introduction example
@@ -24,7 +24,7 @@ function* someComponent({$host}) {
 }
 ```
 
-It takes a ``$host`` DOM element and has a rendering loop. You can wrap that generator with a function that produces a ``render`` function:
+It takes a ``$host`` DOM element and has a rendering loop. You can wrap this generator with a function that produces a ``render`` function:
 
 ```Javascript
 const createComponent = (generator) => ({$host}) => {
@@ -51,8 +51,8 @@ render({name: 'Bernadette'});
 
 ## The power of functions
 
-For now, the rendering loop is a piece of imperative code but, it can use whatever rendering library you want (react and so on). 
-The first aforementioned point says that functions (and therefore coroutines) are very versatile in Javascript. We can easily get back to a known paradigm if we wish to. We can for example use [lit-html](./todo) to have a declarative view instead of a bunch of imperative code: 
+For now, the rendering loop is a piece of imperative code, but it can use any rendering library you want (react and so on).
+The first point above says that functions (and therefore coroutines) are very versatile in Javascript. We could easily go back to a known paradigm if we wanted to. For example, we use [lit-html](./todo) to have a declarative view instead of a bunch of imperative code:
 
 ```Javascript
 import {render, html} from 'lit-element';
@@ -66,7 +66,7 @@ const HelloWorldComponent = createComponent(function* ({$host}) {
 });
 ```
 
-you can factorise the template into a function: 
+you can draw the template into a function: 
 
 ```Javascript
 import {html} from 'lit-element';
@@ -87,13 +87,14 @@ const withView = (templateFn) => function* ({$host}) {
 
 const HelloWorldComponent = createComponent(withView(template));
 ```
-Fine, our component is now a simple function of state ``({name}) => html\`<p>hello ${name}</p>\``` and we are on a familiar ground.
+All right, our component is now a simple function of the state (`` ({name}) => html\`<p>hello ${name}</p>\` ``), and we are on familiar ground.
 
 ## Maintaining a state
 
 Having an infinite rendering loop to model our component can actually be more interesting than it seems at first: you can have a state in the closure of that loop. 
 
-If we first modify a little bit the ``createComponent`` higher order function to bind the ``render`` function to the host element: 
+If we first modify the higher-level ``createComponent`` function a little to bind the ``render`` function to the host element:
+
 ```Javascript
 const createComponent = (generator) => ({$host}) => {
     const gen = generator({$host});
@@ -103,7 +104,7 @@ const createComponent = (generator) => ({$host}) => {
 };
 ```
 
-We can now have the component trigger its own rendering:
+We can now make the component trigger its own rendering:
 
 ```Javascript
 const CountClick = createComponent(function *({$host}){
@@ -121,7 +122,7 @@ const CountClick = createComponent(function *({$host}){
 });
 ```
 
-In frameworks like react, where you only have access to the equivalent of what is inside the loop, you depend on the framework extension points (the hooks in the case of React) to build this sort of mechanism and have very little control on the rendering scheduling.
+In frameworks like React, where you only have access to the equivalent of what is inside the loop, you rely on the framework extension points (the hooks in the case of React) to build this sort of mechanism, and have very little control over rendering scheduling.
 
 ## More function combinators to reduce the coupling. 
 
