@@ -9,7 +9,7 @@ Among other things, coroutines have a few properties that we will use in this sh
 * They are primarily **functions** and can benefit from the whole functional arsenal of Javascript (composition, higher order function, delegation, etc.).
 * They are **stateful**.
 * You can inject pretty much any kind of data when they are paused. For example, an infinite loop within the body of the routine can be considered as a public API function.
-* You cannot, by design, call the ``next`` function concurrently
+* You cannot, by design, call the ``next`` function concurrently.
 
 ## Introduction example
 
@@ -127,7 +127,7 @@ In frameworks like React, where you only have access to the equivalent of what i
 ## More HOF function to reduce the coupling. 
 
 The component embeds its view and some logic at the same time. Again, we can easily decouple them so that we can reuse either the view or the logic:
-All we need to do is take advantage of the third property of coroutines mentioned in the introduction, and a simple delegation mechanism inherent to generators.
+All we need to do is take advantage of the third property of coroutines mentioned in the introduction, and a simple delegation mechanism inherent to generators: ``yield*``.
 
 ```Javascript
 const countClickable = (view) => function *({$host}) {
@@ -153,13 +153,13 @@ const CountClick = createComponent(countClickable(function* ({$host}) {
 }));
 ```
 
-Neat ! You can now use the "clickable" behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data interface (``{ count: number | string}``).
+Neat ! You can now use the "clickable" behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data interface (``{ count: number | string}``): note how the data comes from the ``yield`` assignation.
 
 We will see more patterns like this in future articles.
 
 ## Web components and lifecycle mapping
 
-So far we have designed our component to be a function of the host. We can go further and ensure that the rendering routine is actually private to the host, so that the rendering code is encapsulated inside along with any potential behaviour enhancements (the ``countClickable`` mixin for example). 
+So far we have designed our component to be a function of the host. We can go further and ensure that the rendering routine is actually private to the host, so that the rendering code is encapsulated inside along with any potential behaviour enhancements (the ``countClickable`` mixin for example), while both remain reusable. 
 
 Let's look at another way of modelling [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements). To enhance your HTML document, you can teach the browser new ones using its registry and the ``define`` method.
 
@@ -177,7 +177,7 @@ And then use the ``hello-world`` tag in the markup like any other regular HTML t
 <hello-world name="Laurent"></hello-world>
 ```
 
-Instead of using a class that extends the ``HTMLElement`` class (or any other valid specific element class), we want the second argument to be a generator function. This means our custom ``define`` would need to turn the generator into a class.
+Instead of using a class that extends the ``HTMLElement`` class (or any other valid built-in element class), we want the second argument to be a generator function. This means our custom ``define`` would need to turn the generator into a class.
 
 ```javascript
 const define = (tag, gen) => {
@@ -215,7 +215,7 @@ Using a class expression, we create the custom element class on the fly. The ``#
 
 When the ``connectedCallback`` is called (this happens when the component is mounted into the DOM). We call ``next`` again, which in our previous example corresponds to the first iteration of the loop. Then, whenever the component needs to be rendered (when ``render`` is called) again, we continue the loop.
 
-This is very interesting because we are able to match the different component life cycles to a location within the generator function:
+This is very interesting because we are able to match the different component lifecycles to a location within the generator function:
 
 ```Javascript
 function* comp({$host}) {
@@ -237,7 +237,7 @@ function* comp({$host}) {
 }
 ```
 
-One important lifecycle remains to be implemented. When the component is unmounted, the ``disconnectedCallbak`` of the class definition is normally called, allowing us to run cleanup code and avoid memory leaks for example.  
+Yet, one important lifecycle remains to be implemented. When the component is unmounted, the ``disconnectedCallbak`` of the class definition is normally called, allowing us to run cleanup code and avoid memory leaks for example.  
 
 In the generator we can force the exit of the loop into a ``finally`` clause. This is as simple as calling the loop's ``return`` function instead of the usual ``next``.
 
@@ -299,7 +299,7 @@ This "linear" representation of the component and its lifetime makes things easi
 
 ## Concurrent updates
 
-But before we conclude, we can illustrate the fourth point mentioned in the introduction: if you try to advance a generator function while it is already advancing, you will get an error. In the component world, this means that concurrent rendering is impossible by design!
+Before we conclude, we can illustrate the fourth point mentioned in the introduction: if you try to advance a generator function while it is already advancing, you will get an error. In the component world, this means that concurrent rendering is impossible by design!
 
 This code: 
 
