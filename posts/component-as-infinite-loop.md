@@ -125,6 +125,7 @@ const CountClick = createComponent(function *({$host}){
 In frameworks like React, where you only have access to the equivalent of what is inside the loop, you rely on the framework extension points (the hooks in the case of React) to build this sort of mechanism, and have very little control over rendering scheduling.
 
 ## More HOF function to reduce the coupling. 
+
 The component embeds its view and some logic at the same time. Again, we can easily decouple them so that we can reuse either the view or the logic:
 All we need to do is take advantage of the third property of coroutines mentioned in the introduction, and a simple delegation mechanism inherent to generators.
 
@@ -152,9 +153,176 @@ const CountClick = createComponent(countClickable(function* ({$host}) {
 }));
 ```
 
-Neat ! You can now use the "clickable" behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data.
+Neat ! You can now use the "clickable" behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data interface (``{ count: number | string}``).
 
 We will see more patterns like this in future articles.
 
 ## Web components and lifecycle mapping
+
+So far we have designed our component to be a function of the host. We can go further and ensure that the rendering routine is actually private to the host, so that the rendering code is encapsulated inside along with any potential behaviour enhancements (the ``countClickable`` mixin for example). 
+
+Let's look at another way of modelling [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements). To enhance your HTML document, you can teach the browser new ones using its registry and the ``define`` method.
+
+```Javascript
+customElements.define('hello-world', class extends HTMLElement {
+    connectedCallback() {
+        this.textContent = `hello ${this.getAttribute('name')}`
+    }
+}) // (define takes a third optional argument we won't consider for the moment)
+```
+
+And then use the ``hello-world`` tag in the markup like any other regular HTML tag.
+
+```html
+<hello-world name="Laurent"></hello-world>
+```
+
+Instead of using a class that extends the ``HTMLElement`` class (or any other valid specific element class), we want the second argument to be a generator function. This means our custom ``define`` would need to turn the generator into a class.
+
+```javascript
+const define = (tag, gen) => {
+    customElements.define(tag, class extends HTMLElement {
+        #loop;
+
+        constructor() {
+            super();
+            this.#loop = gen.bind(this)({
+                $host: this
+            });
+            this.render = this.render.bind(this);
+            this.#loop.next();
+        }
+
+        connectedCallback() {
+            this.render();
+        }
+
+        render(state = {}) {
+            this.#loop.next(state);
+        }
+
+    });
+};
+
+define('hello-world', function* ({$host}) {
+    while(true) {
+        yield;
+        $host.textContent = `hello ${$host.getAttribute('name')}`
+    }
+});
+```
+Using a class expression, we create the custom element class on the fly. The ``#loop`` rendering routine is instantiated inside the constructor and advanced to its first ``yield`` point. Note that we pass the host as a parameter to the routine, although the routine is specifically bound to the host so that we could just use ``this`` inside the generator to refer to the host. This is a personal preference as I find the use of ``this`` in Javascript very error-prone.
+
+When the ``connectedCallback`` is called (this happens when the component is mounted into the DOM). We call ``next`` again, which in our previous example corresponds to the first iteration of the loop. Then, whenever the component needs to be rendered (when ``render`` is called) again, we continue the loop.
+
+This is very interesting because we are able to match the different component life cycles to a location within the generator function:
+
+```Javascript
+function* comp({$host}) {
+
+    console.log('I am being instantiated');
+
+    yield;
+
+    console.log('Iam being mounted');
+    $host.textContent = 'I have just been mounted';
+
+    yield;
+
+    while (true) {
+        console.log('I am being rendered');
+        $host.textContent = `hello ${$host.getAttribute('name')}`;
+        yield 'I have been rendered';
+    }
+}
+```
+
+One important lifecycle remains to be implemented. When the component is unmounted, the ``disconnectedCallbak`` of the class definition is normally called, allowing us to run cleanup code and avoid memory leaks for example.  
+
+In the generator we can force the exit of the loop into a ``finally`` clause. This is as simple as calling the loop's ``return`` function instead of the usual ``next``.
+
+Altogether: 
+
+```javascript
+const define = (tag, gen) => {
+    customElements.define(tag, class extends HTMLElement {
+        #loop;
+
+        constructor() {
+            super();
+            this.#loop = gen.bind(this)({
+                $host: this
+            });
+            this.render = this.render.bind(this);
+            this.#loop.next();
+        }
+
+        connectedCallback() {
+            this.render();
+        }
+        
+        disconnectedCallback() {
+            this.#loop.return();
+        }
+
+        render(state = {}) {
+            this.#loop.next(state);
+        }
+
+    });
+};
+
+function* comp({$host}) {
+
+    console.log('I am being instantiated');
+
+    yield;
+
+    console.log('Iam being mounted');
+    $host.textContent = 'I have just been mounted'
+
+    yield;
+
+    try {
+        while (true) {
+            console.log('I am being rendered');
+            $host.textContent = `hello ${$host.getAttribute('name')}`;
+            yield;
+        }
+    } finally {
+        console.log('cleanup here !!!');
+    }
+}
+```
+
+This "linear" representation of the component and its lifetime makes things easier to reason about: there are no surprises when a callback or a hook is called, everything is read from top to bottom!
+
+## Concurrent updates
+
+But before we conclude, we can illustrate the fourth point mentioned in the introduction: if you try to advance a generator function while it is already advancing, you will get an error. In the component world, this means that concurrent rendering is impossible by design!
+
+This code: 
+
+```javascript
+function* comp({$host}) {
+    while (true) {
+        console.log('I am being rendered');
+
+        $host.render(); // yet I try to render ...
+
+        $host.textContent = `hello ${$host.getAttribute('name')}`;
+        yield;
+    }
+}
+```
+
+will trigger an error ``Uncaught TypeError: already executing generator``.
+
+## conclusion
+
+We have seen throughout this article that the functional nature of a generator combined with its intrinsic properties can be useful to build a very flexible and simple abstraction of UI component, with the ability to split behaviour and view into reusable bits, to maintain internal state or to have at reach all component lifecycles in the same place.
+
+In the next article, we will see how we can further improve and optimise our generator-to-class conversion.   
+
+
 

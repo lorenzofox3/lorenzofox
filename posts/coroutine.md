@@ -24,7 +24,7 @@ console.log(sequence.next().value); // > 4
 
 The ``while(true)`` is interesting (and totally fine) here because it testifies that the generator is being evaluated lazily. What actually happens when you call the ``next`` function is that the generator is executed until the next ``yield`` statement. Whatever the result of the expression on the right side of the ``yield`` is, it becomes the ``value`` of the iterator result and the generator function is paused.
 
-What we don't usually know is that you can pass data to the ``next`` function, which has the effect of assigning that data to any variable on the "left" side of the statement:
+What we don't usually know is that you can pass data to the ``next`` function when you resume the execution of the routine, which has the effect of assigning that data to any variable on the "left" side of the statement:
 
 ```Javascript
 function *generator() {
@@ -136,8 +136,8 @@ store.dispatch({
     type: 'decrement'
 }); // log { count: 1 }
 ```
-The interesting part for us is the ``EventLoop`` routine which, when paused, emits the current state and, when resumed, receives the next action.
-The ``createEventLoop`` function hides the fact that we are using a coroutine to implement the state machine, making it a detail of the implementation. The overall solution is concise and quite simple, thanks to the coroutine. 
+The interesting part for us is the ``EventLoop`` routine which, when paused, yields the current state and, when resumed, receives the next action to process.
+The ``createEventLoop`` function hides the fact that we are using a coroutine to implement the state machine, making it a detail of the implementation. However, thanks to the coroutine, the overall solution remains concise and quite simple. 
 
 ## Async flow example
 
