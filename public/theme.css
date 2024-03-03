@@ -1,0 +1,109 @@
+html {
+    color-scheme: light dark;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+}
+
+body {
+    line-height: 1.4;
+    margin: unset;
+    -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+}
+
+img,
+picture,
+svg,
+canvas {
+    display: block;
+    max-inline-size: 100%;
+    block-size: auto;
+}
+
+/**
+ END RESET
+ **/
+
+:root {
+    --max-content-width: 70ch;
+    --bg-app: #f6f6ff;
+    --bg-surface: #f5f5f5;
+    --gray: #1e1e1e;
+    --accent: #1c5aab;
+}
+
+body {
+    font-family: system-ui, sans-serif, Helvetica;
+    font-size: clamp(1.3rem, 0.5vw + 1rem, 1.4rem);
+    color: var(--gray);
+    background-color: var(--bg-app);
+    min-height: 100svh;
+    line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+        --bg-app: #142334;
+        --bg-surface: #1e334f;
+        --gray: #ececec;
+        --accent: #96bffa;
+
+    }
+}
+
+main {
+    width: min(100% - 2rem, var(--max-content-width));
+    margin-inline: auto;
+    margin-block-end: 2em;
+}
+
+p {
+    margin-block: 1em;
+}
+
+* + :where(h2, h3, h4, h5) {
+    margin-block-start: 2em;
+}
+
+h2 {
+    font-size: 1.4em;
+}
+
+pre {
+    padding: 1em 0.8em;
+    border: 1px solid var(--accent);
+    overflow: auto;
+    font-size: 0.9em;
+    line-height: 1.6;
+    border-radius: 4px;
+    box-shadow: 0 0 0.25em 0 var(--accent) inset;
+}
+
+a {
+    color: var(--accent);
+}
+
+/*pre, code {*/
+/*    max-width: 100%;*/
+/*}*/
+
+

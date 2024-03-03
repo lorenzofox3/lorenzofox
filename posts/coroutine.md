@@ -1,6 +1,8 @@
-# coroutines
+---
+title: Coroutines
+---
 
-A coroutine is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
+A [coroutine](https://en.wikipedia.org/wiki/Coroutine) is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
 
 ## In javascript
 

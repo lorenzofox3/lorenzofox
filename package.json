@@ -6,6 +6,10 @@
     "url": "https://github.com/lorenzofox3/lorenzofox"
   },
   "license": "MIT",
-  "scripts": {},
-  "dependencies": {}
+  "scripts": {
+    "dev": "eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
 }
