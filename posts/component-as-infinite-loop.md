@@ -3,7 +3,7 @@ title: Coroutines and web components
 date: 2024-03-04
 ---
 
-In the [previous article](./coroutine) we learned what coroutines are and saw some patterns they can help implement.
+In the [previous article](./posts/coroutine) we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
 
 ## Rendering loop
