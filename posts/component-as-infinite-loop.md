@@ -1,4 +1,7 @@
-# Coroutines and web components
+---
+title: Coroutines and web components
+date: 2024-03-04
+---
 
 In the [previous article](./coroutine) we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
@@ -15,7 +18,7 @@ Among other things, coroutines have a few properties that we will use in this sh
 
 Consider the following generator: 
 
-```Javascript
+```js
 function* someComponent({$host}) {
     while (true) {
         const {content = ''} = yield;
@@ -26,7 +29,7 @@ function* someComponent({$host}) {
 
 It takes a ``$host`` DOM element and has a rendering loop. You can wrap this generator with a function that produces a ``render`` function:
 
-```Javascript
+```js
 const createComponent = (generator) => ({$host}) => {
     const gen = generator({$host});
     gen.next(); // we initiate the component by entering inside the rendering loop
@@ -54,7 +57,7 @@ render({name: 'Bernadette'});
 For now, the rendering loop is a piece of imperative code, but it can use any rendering library you want (react and so on).
 The first point above says that functions (and therefore coroutines) are very versatile in Javascript. We could easily go back to a known paradigm if we wanted to. For example, we use [lit-html](./todo) to have a declarative view instead of a bunch of imperative code:
 
-```Javascript
+```js
 import {render, html} from 'lit-element';
 
 const HelloWorldComponent = createComponent(function* ({$host}) {
@@ -68,7 +71,7 @@ const HelloWorldComponent = createComponent(function* ({$host}) {
 
 you can draw the template into a function: 
 
-```Javascript
+```js
 import {html} from 'lit-element';
 
 const template = ({name = ''} = {}) => html`<p>hello ${name}</p>`;
@@ -76,7 +79,7 @@ const template = ({name = ''} = {}) => html`<p>hello ${name}</p>`;
 
 And compose with a new higher order function: 
 
-```Javascript
+```js
 import {render} from 'lit-element';
 
 const withView = (templateFn) => function* ({$host}) {
@@ -87,7 +90,10 @@ const withView = (templateFn) => function* ({$host}) {
 
 const HelloWorldComponent = createComponent(withView(template));
 ```
-All right, our component is now a simple function of the state (`` ({name}) => html\`<p>hello ${name}</p>\` ``), and we are on familiar ground.
+All right, we are on familiar ground: our component is now a simple function of the state
+```js 
+({name}) => html`<p>hello ${name}</p>`; 
+```
 
 ## Maintaining a state
 
@@ -95,7 +101,7 @@ Having an infinite rendering loop to model our component can actually be more in
 
 If we first modify the higher-level ``createComponent`` function a little to bind the ``render`` function to the host element:
 
-```Javascript
+```js
 const createComponent = (generator) => ({$host}) => {
     const gen = generator({$host});
     gen.next();
@@ -106,7 +112,7 @@ const createComponent = (generator) => ({$host}) => {
 
 We can now make the component trigger its own rendering:
 
-```Javascript
+```js
 const CountClick = createComponent(function *({$host}){
    let clickCount = 0;
    
@@ -129,7 +135,7 @@ In frameworks like React, where you only have access to the equivalent of what i
 The component embeds its view and some logic at the same time. Again, we can easily decouple them so that we can reuse either the view or the logic:
 All we need to do is take advantage of the third property of coroutines mentioned in the introduction, and a simple delegation mechanism inherent to generators: ``yield*``.
 
-```Javascript
+```js
 const countClickable = (view) => function *({$host}) {
     let clickCount = 0;
 
@@ -144,7 +150,7 @@ const countClickable = (view) => function *({$host}) {
 
 This type of mixin is responsible for holding the state and triggering the rendering of any _view_. Rendering is left to the view thanks to **delegation**, while the state is passed whenever the view coroutine is paused and requires a new render:
 
-```Javascript
+```js
 const CountClick = createComponent(countClickable(function* ({$host}) {
     while (true) {
         const {count = 0} = yield;
@@ -163,7 +169,7 @@ So far we have designed our component to be a function of the host. We can go fu
 
 Let's look at another way of modelling [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements). To enhance your HTML document, you can teach the browser new ones using its registry and the ``define`` method.
 
-```Javascript
+```js
 customElements.define('hello-world', class extends HTMLElement {
     connectedCallback() {
         this.textContent = `hello ${this.getAttribute('name')}`
@@ -179,7 +185,7 @@ And then use the ``hello-world`` tag in the markup like any other regular HTML t
 
 Instead of using a class that extends the ``HTMLElement`` class (or any other valid built-in element class), we want the second argument to be a generator function. This means our custom ``define`` would need to turn the generator into a class.
 
-```javascript
+```js
 const define = (tag, gen) => {
     customElements.define(tag, class extends HTMLElement {
         #loop;
@@ -217,7 +223,7 @@ When the ``connectedCallback`` is called (this happens when the component is mou
 
 This is very interesting because we are able to match the different component lifecycles to a location within the generator function:
 
-```Javascript
+```js
 function* comp({$host}) {
 
     console.log('I am being instantiated');
@@ -243,7 +249,7 @@ In the generator we can force the exit of the loop into a ``finally`` clause. Th
 
 Altogether: 
 
-```javascript
+```js
 const define = (tag, gen) => {
     customElements.define(tag, class extends HTMLElement {
         #loop;
@@ -303,7 +309,7 @@ Before we conclude, we can illustrate the fourth point mentioned in the introduc
 
 This code: 
 
-```javascript
+```js
 function* comp({$host}) {
     while (true) {
         console.log('I am being rendered');

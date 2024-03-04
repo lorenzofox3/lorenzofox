@@ -1,5 +1,6 @@
 ---
 title: Coroutines
+date: 2024-02-24
 ---
 
 A [coroutine](https://en.wikipedia.org/wiki/Coroutine) is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
@@ -8,7 +9,7 @@ A [coroutine](https://en.wikipedia.org/wiki/Coroutine) is a function whose execu
 
 In Javascript you can implement (sort of) coroutines using generator functions. You may have already used generator functions to implement iterators and sequences. 
 
-```Javascript
+```js
 function *integers(){
     let n = 0;
     while(true){
@@ -28,7 +29,7 @@ The ``while(true)`` is interesting (and totally fine) here because it testifies 
 
 What we don't usually know is that you can pass data to the ``next`` function when you resume the execution of the routine, which has the effect of assigning that data to any variable on the "left" side of the statement:
 
-```Javascript
+```js
 function *generator() {
     while(true){
         const action = yield;
@@ -50,7 +51,7 @@ Although you will often use the generator as either a producer or a sink of data
 
 See the following "Redux" like state machine:
 
-```Javascript
+```js
 function* EventLoop({reducer, state}) {
     while (true) {
         const action = yield state; // wow !
@@ -145,7 +146,7 @@ The ``createEventLoop`` function hides the fact that we are using a coroutine to
 
 In the previous example we saw how we could model an event loop with a coroutine. In the following example, we will see a different kind of "cooperative multitasking", building an asynchronous workflow with the same semantics as the regular ``async`` function ( with the ``await`` keyword).
 
-```Javascript 
+```js 
 const co = (genFn) => (...args) => {
   const gen = genFn(...args);
     
@@ -160,7 +161,7 @@ const co = (genFn) => (...args) => {
     }
 
     // non promise value
-    if (value.then === undefined) {
+    if (value?.then === undefined) {
       return next(value);
     }
 
@@ -182,7 +183,7 @@ fn(42).then(console.log);
 The idea behind is quite simple: our main asynchronous function is paused whenever it delegates a task to another function. If that function is itself asynchronous, we wait for the pending Promise to resolve and then resume the main routine with the resolved value.
 This is very similar to the ``async`` function, except that you replace the built-in ``await`` keyword with ``yield``.
 
-## Going further
+## <span>Going further</span>
 
 It is important to note that a generator has more than just the ``next`` function. ``return`` and ``throw`` can indeed help to create different flows.
 In a future article, we will see how we can use a coroutine to model a UI component as an event loop, where each iteration represents a content rendering. 

@@ -1,0 +1,20 @@
+---
+layout: layout.html
+title: Lorenzofox's dev blog
+---
+
+<p>Hi, I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
+
+<section>
+
+<h2>Latest articles</h2>
+
+{% for post in collections.post reversed %}
+<article class="article-preview">
+    <h3>{{ post.data.title }}</h3>
+    {{ post.content | intro }}
+    <a rel="bookmark" href="{{post.url}}">read more</a>
+</article>
+{% endfor %}
+
+</section>
