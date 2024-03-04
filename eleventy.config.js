@@ -8,4 +8,9 @@ module.exports = function (conf) {
     conf.addFilter("intro", (content) => {
         return content.split('</p>')[0] + '</p>'
     });
+    return {
+        dir: {
+            output: "docs"
+        }
+    }
 }

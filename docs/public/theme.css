@@ -143,6 +143,10 @@ a {
         font-size: 0.7em;
         text-align: center;
     }
+
+    &[href^=http]::after {
+        content: '⇢';
+    }
 }
 
 
