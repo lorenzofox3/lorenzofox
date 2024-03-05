@@ -1,5 +1,5 @@
 ---
-title: Coroutines
+title: Coroutines in Javascript
 date: 2024-02-24
 ---
 

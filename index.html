@@ -3,7 +3,7 @@ layout: layout.html
 title: Lorenzofox's dev blog
 ---
 
-<p>Hi, I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
+<p>Hi! I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
 
 <section>
 
@@ -11,7 +11,14 @@ title: Lorenzofox's dev blog
 
 {% for post in collections.post reversed %}
 <article class="article-preview">
+    <header>
     <h3>{{ post.data.title }}</h3>
+        <p class="publication-date">
+            First publication date:
+            <time datetime="{{ post.date | htmlDateString }}">{{ post.date | readableDate }}</time>
+        </p>
+    </header>
+
     {{ post.content | intro }}
     <a rel="bookmark" href="{{post.url}}">read more</a>
 </article>

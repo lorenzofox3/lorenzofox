@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="{{ eleventy.generator }}">
     <title>lorenzofox blog | {{ title }}</title>
-    <link href="https://unpkg.com/prismjs@1.20.0/themes/prism-okaidia.css" rel="stylesheet">
+    <link rel="icon" href="./public/favicon.ico" />
+    <link href="./public/prism-okaidia.css" rel="stylesheet">
     <link rel="stylesheet" href="./public/theme.css">
     <style>
         #logo {
@@ -18,10 +19,20 @@
 </head>
 <body>
 <header id="main-header">
-    <a href="#main" class="visually-hidden">Skip to main content</a>
     <a href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo" />Home</a>
-    <h1>{{ title }}</h1>
-    <a href="./about">about</a>
+    <div class="title">
+        <h1>{{ title }}</h1>
+        {% if date %}
+        <p class="publication-date">
+            First publication date:
+            <time datetime="{{ date | htmlDateString }}">{{ date | readableDate }}</time>
+        </p>
+        {% endif %}
+
+    </div>
+    {% if page.url != "/about/" %}
+    <a rel="author" href="./about">About</a>
+    {% endif %}
 </header>
 <main id="main">
     {{ content }}

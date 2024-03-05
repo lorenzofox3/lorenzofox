@@ -46,14 +46,15 @@ canvas {
     --max-content-width: 65ch;
     --full-width: 80ch;
     --bg-app: #f6f6ff;
-    --bg-surface: #f5f5f5;
     --gray: #1e1e1e;
+    --mix: #142334;
+    --gray-lighter: color-mix(in lab, var(--mix) 10%, var(--gray));
     --accent: #1c5aab;
 }
 
 body {
     font-family: system-ui, sans-serif, Helvetica;
-    font-size: clamp(1rem, 0.4vw + 1rem, 1.3rem);
+    font-size: clamp(1rem, 0.4vw + 1rem, 1.25rem);
     color: var(--gray);
     background-color: var(--bg-app);
     min-height: 100svh;
@@ -63,36 +64,27 @@ body {
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: dark;
-        --bg-app: #142334;
-        --bg-surface: #1e334f;
+        --bg-app: #172a41;
         --gray: #ececec;
         --accent: #96bffa;
-
+        --mix: #c5dcfd;
     }
 }
 
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    border: 0;
-    padding: 0;
-    white-space: nowrap;
-    clip-path: inset(100%);
-    clip: rect(0 0 0 0);
-    overflow: hidden;
+.publication-date {
+    margin-block: unset;
+    font-size: 0.8em;
+    color: var(--gray-lighter);
 }
 
 #main-header {
+    container: header / inline-size;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     max-width: min(100% - 2rem, var(--full-width));
     margin: auto;
-
-    h1 {
-        padding-inline: 1em;
-    }
+    gap: 0.5em;
 
     a {
         &:has(#logo) {
@@ -103,6 +95,17 @@ body {
         &:last-child {
             margin-inline-start: auto;
         }
+    }
+}
+
+@container header (width < 520px) {
+    a {
+        margin-inline: auto;
+    }
+
+    .title {
+        text-align: center;
+        line-height: 1.2;
     }
 }
 
@@ -129,15 +132,13 @@ h2 {
     font-size: 1.4em;
 }
 
-pre[class*="language-"] {
+pre[class*='language-'] {
     padding: 1em 0.8em;
-    border: 1px solid var(--accent);
     overflow: auto;
     border-radius: 4px;
-    box-shadow: 0 0 0.25em 0 var(--accent) inset;
 }
 
-code[class*="language-"] {
+code[class*='language-'] {
     font-size: 0.8em;
 }
 
@@ -149,22 +150,15 @@ a {
         text-align: center;
     }
 
-    &[href^=http]::after {
-        content: '⇢';
+    &[rel=bookmark]::after {
+        content: '+';
     }
 }
 
 
 p > code {
-    background: lightgray;
+    --_color: color-mix(in lab, var(--bg-app) 85%, var(--mix));
+    background: var(--_color, lightgray);
     padding-inline: 0.25em;
-    color: #1e334f;
-}
-
-.article-preview {
-    padding-block: 1em;
-
-    &:not(:last-child) {
-        border-block-end: 2px solid var(--accent);
-    }
+    font-size: 0.9em;
 }
