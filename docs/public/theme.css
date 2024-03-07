@@ -149,10 +149,6 @@ a {
         font-size: 0.7em;
         text-align: center;
     }
-
-    &[rel=bookmark]::after {
-        content: '+';
-    }
 }
 
 
