@@ -1,6 +1,7 @@
 ---
 title: Coroutines and web components
 date: 2024-03-04
+description: Custom elements (web components) modelling with coroutines 
 ---
 
 In the [previous article](./posts/coroutine) we learned what coroutines are and saw some patterns they can help implement.
