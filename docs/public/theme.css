@@ -31,7 +31,6 @@ p, h1, h2, h3, h4, h5, h6 {
 
 img,
 picture,
-svg,
 canvas {
     display: block;
     max-inline-size: 100%;
