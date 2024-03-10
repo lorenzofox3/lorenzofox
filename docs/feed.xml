@@ -14,7 +14,7 @@
     <link href="https://lorenzofox.dev/posts/component-as-infinite-loop/"/>
     <updated>2024-03-04T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/component-as-infinite-loop/</id>
-    <content xml:lang="en" type="html">&lt;p&gt;In the &lt;a href=&quot;./posts/coroutine&quot;&gt;previous article&lt;/a&gt; we learned what coroutines are and saw some patterns they can help implement.
+    <content xml:lang="en" type="html">&lt;p&gt;In the &lt;a rel=&quot;previous&quot; href=&quot;./posts/coroutine&quot;&gt;previous article&lt;/a&gt; we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.&lt;/p&gt;</content>
   </entry><entry>
     <title>Coroutines in Javascript</title>
