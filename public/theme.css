@@ -44,8 +44,8 @@ canvas {
 
 :root {
     --max-content-width: 65ch;
-    --full-width: 80ch;
-    --bg-app: #f6f6ff;
+    --full-width: 82ch;
+    --bg-app: #ececf5;
     --gray: #1e1e1e;
     --mix: #142334;
     --gray-lighter: color-mix(in lab, var(--mix) 10%, var(--gray));
@@ -57,6 +57,7 @@ body {
     font-size: clamp(1rem, 0.4vw + 1rem, 1.25rem);
     color: var(--gray);
     background-color: var(--bg-app);
+    background-image: linear-gradient(to bottom, color-mix(in lab, white 8%, var(--bg-app)), var(--bg-app));
     min-height: 100svh;
     line-height: 1.5;
 }
@@ -78,34 +79,43 @@ body {
 }
 
 #main-header {
-    container: header / inline-size;
-    display: flex;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: auto 1fr ;
     align-items: center;
-    flex-wrap: wrap;
     max-width: min(100% - 2rem, var(--full-width));
     margin: auto;
-    gap: 0.5em;
+    gap: 0 0.5em;
 
     a {
-        &:has(#logo) {
-            font-size: 0.7em;
-            text-align: center;
-        }
-
         &:last-child {
             margin-inline-start: auto;
         }
     }
-}
 
-@container header (width < 520px) {
-    a {
-        margin-inline: auto;
+    a:has(#logo){
+        grid-row: 1 / span 2;
     }
 
-    .title {
-        text-align: center;
-        line-height: 1.2;
+    nav {
+        grid-row: 1 / 1;
+        grid-column: 2 / 2;
+        margin-inline-start: auto;
+
+        ul {
+            display: flex;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            padding: 0.25em 0.5em;
+        }
+
+        a {
+            text-underline-offset: 0.25em;
+        }
+
     }
 }
 
@@ -144,11 +154,6 @@ code[class*='language-'] {
 
 a {
     color: var(--accent);
-
-    &:has(#logo) {
-        font-size: 0.7em;
-        text-align: center;
-    }
 }
 
 
