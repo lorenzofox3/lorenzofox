@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     
-    <base href="https://lorenzofox.dev/"/>
+    <base href="http://localhost:8080/"/>
     
     <meta name="description" content="home page of Laurent RENARD's blog" >
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -45,6 +45,20 @@
     <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
 </svg></a></h2>
 
+
+<article class="article-preview">
+    <header>
+    <h3>Reactive attributes and micro tasks</h3>
+        <p class="publication-date">
+            First publication date:
+            <time datetime="2024-03-08">Friday, 8 March 2024</time>
+        </p>
+    </header>
+
+    <p>In the <a href="./posts/component-as-infinite-loop">previous article</a>, we finished by providing a function to convert a coroutine into a custom element.
+In this post we will iterate by adding <em>optimised</em> reactive attributes to our component definition, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.</p>
+    <a rel="bookmark" href="/posts/reactive-attributes/">read more</a>
+</article>
 
 <article class="article-preview">
     <header>
