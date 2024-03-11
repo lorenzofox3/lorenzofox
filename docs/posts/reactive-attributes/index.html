@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     
-    <base href="http://localhost:8080/"/>
+    <base href="https://lorenzofox.dev/"/>
     
     <meta name="description" content="Improvement on the coroutine to web component conversion function, adding reactive attributes" >
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
-    <title>lorenzofox blog | Reactive attributes and micro tasks</title>
+    <title>lorenzofox blog | Batch component updates with micro tasks</title>
     <link rel="icon" href="./public/favicon.ico" />
     <link href="./public/prism-okaidia.css" rel="stylesheet">
     <link rel="stylesheet" href="./public/theme.css">
+    <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="Blog" />
     <style>
         #logo {
             aspect-ratio: 1 / 1;
@@ -21,25 +22,218 @@
 </head>
 <body>
 <header id="main-header">
-    <a href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo" />Home</a>
+    <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo" /></a>
     <div class="title">
-        <h1>Reactive attributes and micro tasks</h1>
+        <h1>Batch component updates with micro tasks</h1>
         
 
     </div>
-    
-    <a rel="author" href="./about">About</a>
-    
+    <nav aria-label="main navigation">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a rel="author" href="./about">About</a></li>
+        </ul>
+    </nav>
 </header>
 <main id="main">
-    <p>In the <a href="./posts/component-as-infinite-loop">previous article</a>, we finished by providing a function to convert a coroutine into a custom element.
-In this post we will iterate by adding <em>optimised</em> reactive attributes to our component definition, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.</p>
+    <p>In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
+In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.</p>
 <h2>On component interfaces</h2>
 <p>Custom elements let you declare observable attributes (thus limited to string values) and react to any change. This seems limiting compared to the rich data properties you have with frameworks like Vuejs, React and so on.
-However, You have to keep in mind that, with these frameworks, the component models live in memory within yet another abstraction on top of the Document Object Model that the browser deals with. Custom elements can be serialised (i.e. expressed as an HTML string) just like any regular built-in element.
-This implies, for example, that you don't need any specific tooling/runtime other than an HTML template engine to create these components as part of an HTML fragment on the server side.</p>
-<p>Anyway, we will see later how to define rich reactive properties. But again, these properties would require a programmatic access to the related DOM node rather than a simple declarative approach.</p>
+However, You have to keep in mind that, with these frameworks, the component models live in memory within yet another abstraction on top of the Document Object Model that the browser deals with. Custom elements, on the other hand, can be serialised (i.e. expressed as a plain HTML string) just like any regular built-in element.
+This implies, for example, that you don't need any specific tooling/runtime to add these components as part of an HTML fragment on the server side.</p>
+<p>Anyway, we will see later how to define rich reactive properties. But again, these properties would require a programmatic access to the related DOM node.</p>
+<h2>Basic implementation</h2>
+<p>Have a look at the following code:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">componentify</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">gen<span class="token punctuation">,</span> <span class="token punctuation">{</span>observedAttributes <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">class</span> <span class="token class-name">extends</span> HTMLElement <span class="token punctuation">{</span>
+    #loop<span class="token punctuation">;</span>
+
+    <span class="token keyword">static</span> <span class="token keyword">get</span> <span class="token function">observedAttributes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span>observedAttributes<span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">attributeChangedCallback</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token punctuation">,</span> oldValue<span class="token punctuation">,</span> newValue</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>oldValue <span class="token operator">!==</span> newValue <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>isConnected<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>#loop <span class="token operator">=</span> <span class="token function">gen</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            <span class="token literal-property property">$host</span><span class="token operator">:</span> <span class="token keyword">this</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>render <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>#loop<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">disconnectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>#loop<span class="token punctuation">.</span><span class="token function">return</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">render</span><span class="token punctuation">(</span><span class="token parameter">state <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>#loop<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            <span class="token literal-property property">attributes</span><span class="token operator">:</span> <span class="token function">getAttributes</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            <span class="token operator">...</span>state
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">getAttributes</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">el</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+    Object<span class="token punctuation">.</span><span class="token function">fromEntries</span><span class="token punctuation">(</span>
+        el<span class="token punctuation">.</span><span class="token function">getAttributeNames</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">name</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">[</span>name<span class="token punctuation">,</span> el<span class="token punctuation">.</span><span class="token function">getAttribute</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">define</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">tag<span class="token punctuation">,</span> gen<span class="token punctuation">,</span> options</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span>tag<span class="token punctuation">,</span> <span class="token function">componentify</span><span class="token punctuation">(</span>gen<span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">,</span> options <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>In comparison with the previous article, we have extracted the function that turns a generator into a class. We also now inject the attributes into the loop (<code>getAttributes</code>). This is not mandatory, as the host is injected into the generator anyway, but I find it more convenient to have this data as a POJO.</p>
+<p>More interesting for us: the <code>define</code> (and <code>componentify</code>) takes a third optional argument, which allows us to declare a list of attributes to watch. The static <code>observedAttributes</code> getter is the way to declare to the engine which attributes we want to observe. Whenever one of the observed attributes changes, the <code>attributeChangedCallback</code> is called. We handle this by calling the <code>render</code> function, unless the value has not actually changed or the component is not yet connected (because we will render it anyway when it is mounted).</p>
+<p>We are now able to define components with reactive attributes:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> template <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'template'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+template<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+        &lt;span>_&lt;/span> +
+        &lt;span>_&lt;/span> =
+        &lt;output>?&lt;/output>
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+
+<span class="token function">define</span><span class="token punctuation">(</span><span class="token string">'basic-sum'</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    $host<span class="token punctuation">.</span><span class="token function">replaceChildren</span><span class="token punctuation">(</span>template<span class="token punctuation">.</span>content<span class="token punctuation">.</span><span class="token function">cloneNode</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> <span class="token punctuation">[</span>aEl<span class="token punctuation">,</span> bEl<span class="token punctuation">]</span> <span class="token operator">=</span> Array<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span>$host<span class="token punctuation">.</span><span class="token function">querySelectorAll</span><span class="token punctuation">(</span><span class="token string">'span'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> output <span class="token operator">=</span> $host<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'output'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> <span class="token punctuation">{</span>attributes<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">yield</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> <span class="token punctuation">{</span>a<span class="token punctuation">,</span> b<span class="token punctuation">}</span> <span class="token operator">=</span> attributes<span class="token punctuation">;</span>
+
+        aEl<span class="token punctuation">.</span>textContent <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        bEl<span class="token punctuation">.</span>textContent <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        output<span class="token punctuation">.</span>textContent <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>a<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token function">Number</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">observedAttributes</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'a'</span><span class="token punctuation">,</span> <span class="token string">'b'</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// &lt;basic-sum a="42" b="58">&lt;/basic-sum></span></code></pre>
+<p>And if you change either attribute <code>a</code> or attribute <code>b</code>, the calculation result will be updated!</p>
+<h2>Many updates at the same time</h2>
+<p>What happens if you update both attributes in the same call stack ? (You can first add a <code>console.log</code> statement inside the <code>render</code> function)</p>
+<pre class="language-js"><code class="language-js">document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'basic-sum'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>currentTarget<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    currentTarget<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'a'</span><span class="token punctuation">,</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    currentTarget<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'b'</span><span class="token punctuation">,</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>The <code>render</code> function is called <strong>twice</strong> (once for each attribute). This is not necessarily a big deal, especially for attributes and simple components like the one we just wrote.<br>
+But, as we saw in the previous article, you can split the update logic into a stack of independent controllers, thanks to higher order functions. Imagine the fictive controller below where every change on the <code>$scope</code> variable triggers an update:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">createBookListController</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> $scope <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">// initial state</span>
+    $scope<span class="token punctuation">.</span>isLoading <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+    $scope<span class="token punctuation">.</span>books <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    $scope<span class="token punctuation">.</span>error <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+        <span class="token keyword">async</span> <span class="token function">search</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> query <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                $scope<span class="token punctuation">.</span>isLoading <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+                $scope<span class="token punctuation">.</span>books <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                $scope<span class="token punctuation">.</span>error <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+                $scope<span class="token punctuation">.</span>books<span class="token operator">=</span> <span class="token keyword">await</span> searchService<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span><span class="token punctuation">{</span> query <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                $scope<span class="token punctuation">.</span>error <span class="token operator">=</span> err<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
+                $scope<span class="token punctuation">.</span>isLoading <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>The initialisation would already trigger three updates. Then, when you have finished loading the books, you render the whole book list twice: once when you effectively assign <code>books</code> but also another time when you change the loading status.
+To solve this issue, you could reach for more fine-grained construction like <a href="https://dev.to/this-is-learning/the-evolution-of-signals-in-javascript-8ob">signals</a> or observables (etc.), but it comes with all the ceremony they require. Would it not be easier to batch all the changes that occur in the same call stack ?</p>
+<h2>Tasks and Micro tasks</h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">The MDN documentation</a> will explain better than I can do what <strong>microtasks</strong> are and how they differ from <strong>tasks</strong>. But in a nutshell: a microtask is a piece of code that is executed when there is nothing left to execute within a task and before the control is given back to the Javascript Event Loop. A (synchronous) call stack is executed inside the same task, so deferring the rendering code at the end of the call stack would simply mean executing that code inside a micro task. Here comes <a href="https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask">queueMicrotask</a>:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">componentify</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">gen<span class="token punctuation">,</span> <span class="token punctuation">{</span>observedAttributes <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">class</span> <span class="token class-name">extends</span> HTMLElement <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+    #updateStack <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token function">render</span><span class="token punctuation">(</span><span class="token parameter">state <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> currentPendingUpdateCount <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#updateStack<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>#updateStack<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>currentPendingUpdateCount<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            window<span class="token punctuation">.</span><span class="token function">queueMicrotask</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+                console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'rendering'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">const</span> arg <span class="token operator">=</span> <span class="token punctuation">{</span>
+                    <span class="token literal-property property">attributes</span><span class="token operator">:</span> <span class="token function">getAttributes</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    <span class="token operator">...</span>Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>#updateStack<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">}</span><span class="token punctuation">;</span>
+                <span class="token keyword">this</span><span class="token punctuation">.</span>#loop<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>arg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">this</span><span class="token punctuation">.</span>#updateStack<span class="token punctuation">.</span>length <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">disconnectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        window<span class="token punctuation">.</span><span class="token function">queueMicrotask</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>isConnected <span class="token operator">===</span> <span class="token boolean">false</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">this</span><span class="token punctuation">.</span>#loop<span class="token punctuation">.</span><span class="token function">return</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>We add an internal <code>updateStack</code>. Now whenever <code>render</code> (should we rename it for <code>update</code> ? ) is called, we add the requested update to the stack. If there is not yet any pending update, we enqueue the call to the internal loop (the actual rendering) in the micro task queue.
+That's it: the updates occurring within the same context (same call stack) are batched together.</p>
+<p>Note that some updates may conflict with each other. The resolution algorithm is quite simple: the last call takes precedence (following how <code>Object.assign</code> works).</p>
+<p>For another reason, we also run the component teardown code inside a microtask. Attentive readers will have noticed that when a component is unmounted it becomes <em>dead</em> as we have exited the rendering loop. This is fine, if you are not trying to reuse the corresponding DOM node later. But sometimes, you just want to move the node around in the DOM tree (for example, when rearranging list items). This disconnects and reconnects the node in the same call stack. By using a microtask, you prevent the component from leaving its rendering loop.</p>
+<h2>Caveats and points of attention</h2>
+<p>You can technically enqueue a microtask from a microtask, never giving control back to the Javascript Event Loop. This could lead to the locking of the main thread if you are careless (calling a render inside the rendering loop).
+It also means that concurrent calls to <code>render</code> will no longer throw an error as they will be batched together. However, the order is still guaranteed.</p>
+<p>Another side effect is that if you want to asset the result of an update, you will have to do it on the next task of the Event Loop. This is not a problem but can cause confusion in test files:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>test<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'zora'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token function-variable function">nextTick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">resolve</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">'basic-sum computes the result when attributes are updated'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>eq<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> el <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'basic-sum'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    el<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'a'</span><span class="token punctuation">,</span> <span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    el<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'b'</span><span class="token punctuation">,</span> <span class="token number">58</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    debug<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>el<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> output <span class="token operator">=</span> el<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'output'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">eq</span><span class="token punctuation">(</span>output<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span> <span class="token string">'100'</span><span class="token punctuation">)</span> <span class="token comment">// will fail;</span>
+
+    <span class="token keyword">await</span> <span class="token function">nextTick</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">eq</span><span class="token punctuation">(</span>output<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span> <span class="token string">'100'</span><span class="token punctuation">)</span> <span class="token comment">// will pass;</span>
+
+    el<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'a'</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">eq</span><span class="token punctuation">(</span>output<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span> <span class="token string">'60'</span><span class="token punctuation">)</span> <span class="token comment">// will fail;</span>
+
+    <span class="token keyword">await</span> <span class="token function">nextTick</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">eq</span><span class="token punctuation">(</span>output<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span> <span class="token string">'60'</span><span class="token punctuation">)</span> <span class="token comment">// will pass;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Conclusion</h2>
+<p>We have improved our component definition by adding reactivity through attributes. We used microtasks to optimise and batch the updates that occur in the same context. This is a powerful (and little known) tool, although it has some drawbacks.
+The next step will be to see how we can build a set of controllers: higher order functions that are dedicated to encapsulating the state and update logic.</p>
 
 </main>
+<footer id="main-footer">
+    <p>© Laurent RENARD. All Rights Reserved.</p>
+    <nav aria-labelledby="footer-links">
+        <h2 id="footer-links">Author links</h2>
+        <ul>
+            <li><a href="https://www.linkedin.com/in/laurent-renard-a39b5357">linkedin</a></li>
+            <li><a href="https://github.com/lorenzofox3">Github</a></li>
+            <li><a href="https://lorenzofox3.medium.com/">Medium</a></li>
+            <li><a href="https://dev.to/lorenzofox3">Dev.to</a></li>
+            <li><a href="./feed.xml">RSS</a></li>
+        </ul>
+    </nav>
+</footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     
-    <base href="http://localhost:8080/"/>
+    <base href="https://lorenzofox.dev/"/>
     
     <meta name="description" content="Introduction to coroutines in Javascript, using generator functions" >
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -199,7 +199,7 @@ The <code>createEventLoop</code> function hides the fact that we are using a cor
 This is very similar to the <code>async</code> function, except that you replace the built-in <code>await</code> keyword with <code>yield</code>.</p>
 <h2><span>Going further</span></h2>
 <p>It is important to note that a generator has more than just the <code>next</code> function. <code>return</code> and <code>throw</code> can indeed help to create different flows.
-In a future article, we will see how we can use a coroutine to model a UI component as an event loop, where each iteration represents a content rendering.</p>
+In <a href="./posts/component-as-infinite-loop" rel="next">a future article</a>, we will see how we can use a coroutine to model a UI component as an event loop, where each iteration represents a content rendering.</p>
 
 </main>
 <footer id="main-footer">

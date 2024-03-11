@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     
-    <base href="http://localhost:8080/"/>
+    <base href="https://lorenzofox.dev/"/>
     
     <meta name="description" content="home page of Laurent RENARD's blog" >
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -48,15 +48,15 @@
 
 <article class="article-preview">
     <header>
-    <h3>Reactive attributes and micro tasks</h3>
+    <h3>Batch component updates with micro tasks</h3>
         <p class="publication-date">
             First publication date:
-            <time datetime="2024-03-08">Friday, 8 March 2024</time>
+            <time datetime="2024-03-11">Monday, 11 March 2024</time>
         </p>
     </header>
 
-    <p>In the <a href="./posts/component-as-infinite-loop">previous article</a>, we finished by providing a function to convert a coroutine into a custom element.
-In this post we will iterate by adding <em>optimised</em> reactive attributes to our component definition, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.</p>
+    <p>In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
+In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.</p>
     <a rel="bookmark" href="/posts/reactive-attributes/">read more</a>
 </article>
 
@@ -69,7 +69,7 @@ In this post we will iterate by adding <em>optimised</em> reactive attributes to
         </p>
     </header>
 
-    <p>In the <a rel="previous" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
+    <p>In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.</p>
     <a rel="bookmark" href="/posts/component-as-infinite-loop/">read more</a>
 </article>
