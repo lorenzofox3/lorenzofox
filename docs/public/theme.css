@@ -72,7 +72,7 @@ body {
         --bg-app: #172a41;
         --gray: #ececec;
         --accent: #96bffa;
-        --mix: #c5dcfd;
+        --mix: #ffffff;
     }
 }
 
@@ -82,20 +82,25 @@ body {
     align-items: baseline;
     padding-block: 1rem;
     border-top: 1px dashed currentColor;
+    flex-wrap: wrap;
 
     ul {
         list-style: none;
         padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, 8em);
     }
 
     a {
         text-decoration: none;
+        width: min-content;
         color: color-mix(in lab, var(--mix) 30%, var(--accent));
     }
 
     h2 {
         font-size: 1em;
         margin: unset;
+        margin-block-end: 0.5em;
     }
 
     > * {
@@ -189,6 +194,18 @@ code[class*='language-'] {
 
 a {
     color: var(--accent);
+    padding: 2px;
+    border-radius: 4px;
+
+    &:hover {
+        background-color: color-mix(in lab, var(--mix) 10%, var(--bg-app));
+    }
+}
+
+:where(a, h2):has(.icon){
+        display: flex;
+        align-items: center;
+        gap: 0.25em;
 }
 
 
@@ -197,4 +214,12 @@ p > code {
     background: var(--_color, lightgray);
     padding-inline: 0.25em;
     font-size: 0.9em;
+}
+
+.icon {
+    --size: 1.2em;
+    display: inline-block;
+    width: var(--size);
+    height: var(--size);
+    fill: color-mix(in lab, var(--mix) 30%, currentColor);
 }
