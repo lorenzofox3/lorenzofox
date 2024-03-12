@@ -117,25 +117,23 @@ body {
 }
 
 #main-header {
+
     display: grid;
     grid-template-rows: auto 1fr;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 0 0.5em;
 
-    a {
-        &:last-child {
-            margin-inline-start: auto;
-        }
+    .heading {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
-    a:has(#logo) {
-        grid-row: 1 / span 2;
+    .title {
+        flex-grow: 1;
+        text-align: center;
     }
 
     nav {
-        grid-row: 1 / 1;
-        grid-column: 2 / 2;
         margin-inline-start: auto;
 
         ul {
@@ -202,10 +200,10 @@ a {
     }
 }
 
-:where(a, h2):has(.icon){
-        display: flex;
-        align-items: center;
-        gap: 0.25em;
+:where(a, h2):has(.icon) {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
 }
 
 

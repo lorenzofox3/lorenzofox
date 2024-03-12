@@ -1,6 +1,6 @@
 ---
 title: Batch component updates with micro tasks 
-#date: 2024-03-04
+date: 2024-03-11
 description: Improvement on the coroutine to web component conversion function, adding reactive attributes  
 ---
 
