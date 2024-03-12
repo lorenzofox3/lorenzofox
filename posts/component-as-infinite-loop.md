@@ -329,7 +329,7 @@ will trigger an error ``Uncaught TypeError: already executing generator``.
 
 We have seen throughout this article that the functional nature of a generator combined with its intrinsic properties can be useful to build a very flexible and simple abstraction of UI component, with the ability to split behaviour and view into reusable bits, to maintain internal state or to have at reach all component lifecycles in the same place.
 
-In the next article, we will see how we can further improve and optimise our generator-to-class conversion.   
+In <a href="./posts/reactive-attributes" rel="next">the next article</a>, we will see how we can further improve and optimise our generator-to-class conversion.   
 
 
 

@@ -194,7 +194,7 @@ For another reason, we also run the component teardown code inside a microtask. 
 You can technically enqueue a microtask from a microtask, never giving control back to the Javascript Event Loop. This could lead to the locking of the main thread if you are careless (calling a render inside the rendering loop).
 It also means that concurrent calls to ``render`` will no longer throw an error as they will be batched together. However, the order is still guaranteed.
 
-Another side effect is that if you want to asset the result of an update, you will have to do it on the next task of the Event Loop. This is not a problem but can cause confusion in test files: 
+Another side effect is that if you want to assess the result of an update, you will have to do it on the next task of the Event Loop. This is not a problem but can cause confusion in test files: 
 
 ```js
 import {test} from 'zora';
