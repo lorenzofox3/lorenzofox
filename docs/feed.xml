@@ -4,12 +4,20 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-03-11T00:00:00Z</updated>
+  <updated>2024-03-15T10:32:07Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
+    <title>Controllers on top of coroutine components</title>
+    <link href="https://lorenzofox.dev/posts/controllers/"/>
+    <updated>2024-03-15T10:32:07Z</updated>
+    <id>https://lorenzofox.dev/posts/controllers/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;We have previously described &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;a way of modelling custom elements as coroutines (generator functions)&lt;/a&gt;.
+We then made sure that they could &lt;a href=&quot;./posts/reactive-attributes&quot; rel=&quot;prev&quot;&gt;be updated efficiently&lt;/a&gt;.
+In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call &lt;strong&gt;controllers&lt;/strong&gt;.&lt;/p&gt;</content>
+  </entry><entry>
     <title>Batch component updates with micro tasks</title>
     <link href="https://lorenzofox.dev/posts/reactive-attributes/"/>
     <updated>2024-03-11T00:00:00Z</updated>
