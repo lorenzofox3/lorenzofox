@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     
-    <base href="http://localhost:8080/"/>
+    <base href="https://lorenzofox.dev/"/>
     
     <meta name="description" content="Exploration on how to build controllers on top of coroutine web components">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,8 +132,124 @@ Note that we don't have to bother with batching the updates, as it is <a href=".
 <span class="token comment">// ...</span>
 
 helloWorldEl<span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'Lorenzofox'</span><span class="token punctuation">;</span> <span class="token comment">//asignement </span></code></pre>
-<h2>Angularjs like controllers</h2>
-<p>Back in the angularjs days, blah blah</p>
+<h2>Data model controllers</h2>
+<p>Back in the days of <a href="https://angularjs.org/">Angularjs</a>, you could attach a <em>controller</em> to parts of a DOM tree. The controller was
+responsible for the data model (a variable named <code>$scope</code>) and some behaviour (functions) to mutate the data model.
+The data model was exposed to the view template, and any change to the data model would be reflected in the DOM.
+This was nice, because it was easy to test the controller, since it didn't reference the DOM in any way: the logic and the view were correctly separated</p>
+<p>Our version is slightly different:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">createCountController</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$scope<span class="token punctuation">,</span> $host<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> step <span class="token operator">=</span> $host<span class="token punctuation">.</span><span class="token function">hasAttribute</span><span class="token punctuation">(</span><span class="token string">'step'</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token function">Number</span><span class="token punctuation">(</span>$host<span class="token punctuation">.</span><span class="token function">getAttribute</span><span class="token punctuation">(</span><span class="token string">'step'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    $scope<span class="token punctuation">.</span>count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+        <span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+            $scope <span class="token operator">=</span> $scope <span class="token operator">+</span> step<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function">decrement</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+            $scope <span class="token operator">=</span> $scope <span class="token operator">-</span> step<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>We still have the data model (<code>$scope</code>) but the behaviour (or controller API) is returned by the function. The host is also injected so you can use properties/attributes to configure the controller.
+Any change will cause the bound generator to advance while the <code>$scope</code> is injected into the rendering loop:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> template <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'template'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+template<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;button>decrement&lt;/button>&lt;span>&lt;/span>&lt;button>increment&lt;/button></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> withCountController <span class="token operator">=</span> <span class="token function">withController</span><span class="token punctuation">(</span>createCountController<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> component <span class="token operator">=</span> <span class="token function">withCountController</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token operator">*</span><span class="token punctuation">(</span><span class="token punctuation">{</span> $host<span class="token punctuation">,</span> controller<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    $host<span class="token punctuation">.</span><span class="token function">replaceChildren</span><span class="token punctuation">(</span>template<span class="token punctuation">.</span>content<span class="token punctuation">.</span><span class="token function">cloneNode</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> <span class="token punctuation">[</span>decrementEl<span class="token punctuation">,</span> incrementEl<span class="token punctuation">]</span> <span class="token operator">=</span> $host<span class="token punctuation">.</span><span class="token function">querySelectorAll</span><span class="token punctuation">(</span><span class="token string">'button'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> countEl <span class="token operator">=</span> $host<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'span'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    decrementEl<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> controller<span class="token punctuation">.</span>decrement<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    incrementEl<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> controller<span class="token punctuation">.</span>increment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> <span class="token punctuation">{</span> $scope <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">yield</span><span class="token punctuation">;</span>
+        countEl<span class="token punctuation">.</span>textContent <span class="token operator">=</span> $scope<span class="token punctuation">.</span>count<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
+<h3>Implementation</h3>
+<p>Let's see how to implement this type of controller and how to bind it to a custom element:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">withController</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">controllerFn</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+  <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span>deps<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> $scope <span class="token operator">=</span> deps<span class="token punctuation">.</span>$scope <span class="token operator">||</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{</span> $host <span class="token punctuation">}</span> <span class="token operator">=</span> deps<span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> ctrl <span class="token operator">=</span> <span class="token punctuation">{</span>
+      <span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>$scope<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token operator">...</span><span class="token function">controllerFn</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token operator">...</span>deps<span class="token punctuation">,</span>
+        <span class="token comment">// inject a proxy on $scope, so whenever a setter is called the view is refreshed</span>
+        <span class="token literal-property property">$scope</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Proxy</span><span class="token punctuation">(</span>$scope<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+          <span class="token function">set</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> prop<span class="token punctuation">,</span> value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            obj<span class="token punctuation">[</span>prop<span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">;</span>
+            <span class="token comment">// no need to render if the view is not connected</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>$host<span class="token punctuation">.</span>isConnected<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+              $host<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+          <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// override render fn</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{</span> render <span class="token punctuation">}</span> <span class="token operator">=</span> $host<span class="token punctuation">;</span>
+    $host<span class="token punctuation">.</span><span class="token function-variable function">render</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">args <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token operator">...</span>args<span class="token punctuation">,</span>
+        <span class="token literal-property property">$scope</span><span class="token operator">:</span> ctrl<span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// inject controller in the view</span>
+    <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      <span class="token operator">...</span>deps<span class="token punctuation">,</span>
+      <span class="token literal-property property">controller</span><span class="token operator">:</span> ctrl<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>This is very similar to the reactive properties controller.</p>
+<ol>
+<li>The controller uses the passed meta object <code>$scope</code> , or it creates it.</li>
+<li>The actual controller (what will be injected into the generator) is instantiated. A function to clone the current scope is added. Here we don't know the shape of <code>$scope</code> in advance, so we can't use property descriptors and have to use a proxy instead (with the same logic behind it).</li>
+<li>It overrides the host's rendering function for the same reasons as above.</li>
+<li>When the created routine delegates to the underlying generator, it passes the controller.</li>
+</ol>
+<p>And that's it!</p>
+<h2>Subscription based controller</h2>
+<p>In some architectural patterns, you have singleton instances in charge of maintaining their entities. They usually expose commands (functions)
+and notify anyone interested through events. This is the case of the <a href="./posts/coroutine">redux store we built in the very first article of the series</a>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>store<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./path/to/store.js'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">withReduxStore</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    
+    <span class="token keyword">const</span> <span class="token punctuation">{</span>render<span class="token punctuation">}</span> <span class="token operator">=</span> $host<span class="token punctuation">;</span>
+    
+    $host<span class="token punctuation">.</span><span class="token function-variable function">render</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">update <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            <span class="token operator">...</span>update<span class="token punctuation">,</span>
+            <span class="token literal-property property">state</span><span class="token operator">:</span> store<span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">const</span> unsubscribe <span class="token operator">=</span> store<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> $host<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">,</span> store<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
+        <span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span> </code></pre>
+<p>Same logic as before. We just had to unsubscribe from the store in the <code>finally</code> clause, when the component is unmounted.</p>
+<h2>Conclusion</h2>
+<p>All the controllers are simple and short functions that we can easily bind to a generator. Combining them is as easy as applying function composition and the sky is the limit!
+This gives us a wide variety of solutions when it comes to building the architecture of our next applications.
+But with this diversity comes the risk of inconsistency, especially in large teams whose members may have different levels of experience.
+In the next article, we'll make choices and let patterns emerge: we'll build our own UI framework...</p>
 
 </main>
 <footer id="main-footer">
