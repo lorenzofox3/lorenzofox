@@ -95,7 +95,9 @@ Sometimes, if there is no need for configuration, the controller will simply be 
 
     $host<span class="token punctuation">.</span><span class="token function-variable function">render</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">update <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
       <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-        <span class="token operator">...</span>properties<span class="token punctuation">,</span>
+        <span class="token literal-property property">properties</span> <span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token operator">...</span>properties
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
         <span class="token operator">...</span>update<span class="token punctuation">,</span>
       <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 

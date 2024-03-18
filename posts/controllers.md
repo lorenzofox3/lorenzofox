@@ -35,7 +35,9 @@ export const withReactiveProps = (props) => (gen) =>
 
     $host.render = (update = {}) =>
       render({
-        ...properties,
+        properties : {
+            ...properties
+        },
         ...update,
       });
 
