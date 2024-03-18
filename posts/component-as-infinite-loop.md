@@ -4,8 +4,12 @@ date: 2024-03-04
 description: Custom elements (web components) modelling with coroutines 
 ---
 
+<div class="intro"> 
+<p class="wide">
 In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
+</p>
+</div>
 
 ## Rendering loop
 

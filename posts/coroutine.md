@@ -4,7 +4,11 @@ date: 2024-02-24
 description: Introduction to coroutines in Javascript, using generator functions 
 ---
 
-A [coroutine](https://en.wikipedia.org/wiki/Coroutine) is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
+<div class="intro">
+<p class="wide">
+    A <a href="https://en.wikipedia.org/wiki/Coroutine">coroutine</a> is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
+</p>
+</div>
 
 ## In javascript
 

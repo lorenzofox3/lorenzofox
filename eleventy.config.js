@@ -6,7 +6,8 @@ module.exports = function (conf) {
     conf.addPlugin(syntaxHighlight);
     conf.addPlugin(pluginRss);
     conf.addFilter("intro", (content) => {
-        return content.split('</p>')[0] + '</p>'
+        const introP =  (content.split('</p>')[0]).split('<p class="wide">')[1];
+        return `<p>${introP}</p>`
     });
     conf.addPassthroughCopy({
         "./node_modules/prismjs/themes/prism-okaidia.css": "/public/prism-okaidia.css"

@@ -53,14 +53,14 @@
     </symbol>
 </svg>
 
-<header id="main-header">
-    <nav aria-label="main navigation">
+<header id="main-header" >
+    <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
             <li><a rel="author" href="./about">About</a></li>
         </ul>
     </nav>
-    <div class="heading">
+    <div class="heading wide">
         <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Coroutines in Javascript</h1>
@@ -74,7 +74,11 @@
     </div>
 </header>
 <main id="main">
-    <p>A <a href="https://en.wikipedia.org/wiki/Coroutine">coroutine</a> is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.</p>
+    <div class="intro">
+<p class="wide">
+    A <a href="https://en.wikipedia.org/wiki/Coroutine">coroutine</a> is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
+</p>
+</div>
 <h2>In javascript</h2>
 <p>In Javascript you can implement (sort of) coroutines using generator functions. You may have already used generator functions to implement iterators and sequences.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token operator">*</span><span class="token function">integers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
@@ -235,7 +239,7 @@ This is very similar to the <code>async</code> function, except that you replace
 In <a href="./posts/component-as-infinite-loop" rel="next">a future article</a>, we will see how we can use a coroutine to model a UI component as an event loop, where each iteration represents a content rendering.</p>
 
 </main>
-<footer id="main-footer">
+<footer class="wide" id="main-footer">
     <p>© Laurent RENARD. All Rights Reserved.</p>
     <nav aria-labelledby="footer-links">
         <h2 id="footer-links">Author links</h2>
