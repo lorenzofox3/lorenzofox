@@ -4,7 +4,7 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-03-15T11:20:09Z</updated>
+  <updated>2024-03-18T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
@@ -12,30 +12,38 @@
   </author><entry>
     <title>Controllers on top of coroutine components</title>
     <link href="https://lorenzofox.dev/posts/controllers/"/>
-    <updated>2024-03-15T11:20:09Z</updated>
+    <updated>2024-03-18T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/controllers/</id>
-    <content xml:lang="en" type="html">&lt;p&gt;We have previously described &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;a way of modelling custom elements as coroutines (generator functions)&lt;/a&gt;.
-We then made sure that they could &lt;a href=&quot;./posts/reactive-attributes&quot; rel=&quot;prev&quot;&gt;be updated efficiently&lt;/a&gt;.
-In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call &lt;strong&gt;controllers&lt;/strong&gt;.&lt;/p&gt;</content>
+    <content xml:lang="en" type="html">&lt;p&gt;
+We have previously described &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;a way of modelling custom elements as coroutines&lt;/a&gt; (generator functions). 
+We then made sure that they could &lt;a href=&quot;./posts/reactive-attributes&quot; rel=&quot;prev&quot;&gt;be updated efficiently&lt;/a&gt;. 
+In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call &lt;em&gt;controllers&lt;/em&gt;.
+    &lt;/p&gt;</content>
   </entry><entry>
     <title>Batch component updates with micro tasks</title>
     <link href="https://lorenzofox.dev/posts/reactive-attributes/"/>
     <updated>2024-03-11T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/reactive-attributes/</id>
-    <content xml:lang="en" type="html">&lt;p&gt;In the &lt;a href=&quot;./posts/component-as-infinite-loop&quot; rel=&quot;prev&quot;&gt;previous article&lt;/a&gt;, we finished by providing a function to convert a generator into a custom element.
-In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide&quot;&gt;queueMicrotask&lt;/a&gt;.&lt;/p&gt;</content>
+    <content xml:lang="en" type="html">&lt;p&gt;
+In the &lt;a href=&quot;./posts/component-as-infinite-loop&quot; rel=&quot;prev&quot;&gt;previous article&lt;/a&gt;, we finished by providing a function to convert a generator into a custom element.
+In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide&quot;&gt;queueMicrotask&lt;/a&gt;.
+&lt;/p&gt;</content>
   </entry><entry>
     <title>Coroutines and web components</title>
     <link href="https://lorenzofox.dev/posts/component-as-infinite-loop/"/>
     <updated>2024-03-04T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/component-as-infinite-loop/</id>
-    <content xml:lang="en" type="html">&lt;p&gt;In the &lt;a rel=&quot;prev&quot; href=&quot;./posts/coroutine&quot;&gt;previous article&lt;/a&gt; we learned what coroutines are and saw some patterns they can help implement.
-In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.&lt;/p&gt;</content>
+    <content xml:lang="en" type="html">&lt;p&gt;
+In the &lt;a rel=&quot;prev&quot; href=&quot;./posts/coroutine&quot;&gt;previous article&lt;/a&gt; we learned what coroutines are and saw some patterns they can help implement.
+In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
+&lt;/p&gt;</content>
   </entry><entry>
     <title>Coroutines in Javascript</title>
     <link href="https://lorenzofox.dev/posts/coroutine/"/>
     <updated>2024-02-24T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/coroutine/</id>
-    <content xml:lang="en" type="html">&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Coroutine&quot;&gt;coroutine&lt;/a&gt; is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.&lt;/p&gt;</content>
+    <content xml:lang="en" type="html">&lt;p&gt;
+    A &lt;a href=&quot;https://en.wikipedia.org/wiki/Coroutine&quot;&gt;coroutine&lt;/a&gt; is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
+&lt;/p&gt;</content>
   </entry>
 </feed>

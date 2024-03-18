@@ -4,7 +4,9 @@ title: Lorenzofox's dev blog
 description: home page of Laurent RENARD's blog
 ---
 
-<p>Hi! I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
+<div class="intro">
+    <p class="wide">Hi! I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
+</div>
 
 <section>
 
@@ -23,7 +25,7 @@ description: home page of Laurent RENARD's blog
     </header>
 
     {{ post.content | intro }}
-    <a rel="bookmark" href="{{post.url}}">read more</a>
+    <a rel="bookmark" href="{{post.url}}">Read article</a>
 </article>
 {% endfor %}
 

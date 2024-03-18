@@ -1,25 +1,31 @@
 ---
 title: Controllers on top of coroutine components
-#date: 2024-03-04
+date: 2024-03-18
 description: Exploration on how to build controllers on top of coroutine web components
 ---
 
-We have previously described [a way of modelling custom elements as coroutines (generator functions)](./posts/component-as-infinite-loop). 
+<div class="intro">
+    <p class="wide">
+We have previously described <a href="./posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
 We then made sure that they could <a href="./posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
-In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call **controllers**.   
+In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call <em>controllers</em>.
+    </p>
+</div>
 
-## Reactive properties
+## Definition
 
-We have already implemented reactive attributes in the core function. This can sometimes feel limiting, and every framework provides a way to pass rich data through a component tree; while triggering the updates whenever that data changes.
-
-Most of the controllers will be higher order functions that take some configuration parameters as input and return a new function that takes a generator and returns a generator. 
+Most of the controllers will be higher order functions that take some configuration parameters as input and return a new function that takes a generator and returns a generator.
 Sometimes, if there is no need for configuration, the controller will simply be a function that takes a generator and returns a generator.
 
 ```ts
 type Controller = (Generator) => Generator | <Options>(options: Options) => (Generator) => Generator;
 ```
 
-For reactive properties, it is as simple as:
+## Reactive properties
+
+We have already implemented reactive attributes in the core function. This can sometimes feel limiting, and every framework provides a way to pass rich data through a component tree; while triggering the updates whenever that data changes.
+
+Let's see what a reactive properties controller might look like:
 
 ```js
 export const withReactiveProps = (props) => (gen) =>
@@ -66,11 +72,13 @@ The next part is interesting: we override the host's rendering function. The rea
 Finally, we build the reactivity on the meta object using [property descriptors](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty). This allows us to implement our own setters: whenever the property is set, we request an update.
 Note that we don't have to bother with batching the updates, as it is <a href="./posts/reactive-attributes" rel="prev">already done in the core function</a>.
 
-We can then delegate to the input generator using ``yield*``
+We can then delegate to the input generator using ``yield*``. 
+
+Note that the reactive properties is a list of property names. You could go a bit further and also support some sort of configuration object where you specify how to parse the data, whether it should reflect on a given attribute, etc.
 
 ### Usage
 
-We can now compose our component with this controller and it will react to the property assignment. However, this requires programmatic access (which is usually done by a declarative view engine like [lit-html](https://www.npmjs.com/package/lit-html), etc).
+We can now compose our component with this controller, and it will react to the property assignment. However, this requires programmatic access (which is usually done by a declarative view engine like [lit-html](https://www.npmjs.com/package/lit-html), etc.).
 
 ```js
 const observeName = withReactiveProps(['name']);
@@ -92,7 +100,7 @@ helloWorldEl.name = 'Lorenzofox'; //asignement
 Back in the days of [Angularjs](https://angularjs.org/), you could attach a _controller_ to parts of a DOM tree. The controller was
 responsible for the data model (a variable named ``$scope``) and some behaviour (functions) to mutate the data model. 
 The data model was exposed to the view template, and any change to the data model would be reflected in the DOM.
-This was nice, because it was easy to test the controller, since it didn't reference the DOM in any way: the logic and the view were correctly separated
+This was nice, because it was easy to test the controller, since it didn't reference the DOM in any way: the logic and the view were correctly separated.
 
 Our version is slightly different:
 
@@ -112,7 +120,7 @@ export const createCountController = ({$scope, $host}) => {
 }
 ```
 
-We still have the data model (``$scope``) but the behaviour (or controller API) is returned by the function. The host is also injected so you can use properties/attributes to configure the controller.
+We still have the data model (``$scope``) but the behaviour (or controller API) is returned by the factory function. The host is also injected, so you can use properties/attributes to configure the controller.
 Any change will cause the bound generator to advance while the ``$scope`` is injected into the rendering loop:
 
 ```js
@@ -226,6 +234,6 @@ Same logic as before. We just had to unsubscribe from the store in the ``finally
 All the controllers are simple and short functions that we can easily bind to a generator. Combining them is as easy as applying function composition and the sky is the limit! 
 This gives us a wide variety of solutions when it comes to building the architecture of our next applications.
 But with this diversity comes the risk of inconsistency, especially in large teams whose members may have different levels of experience.
-In the next article, we'll make choices and let patterns emerge: we'll build our own UI framework...
+In the next article, we'll make choices and let patterns emerge: we'll build our own UI framework (rebuilding the Vuejs Option API)...
 
 

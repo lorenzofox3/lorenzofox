@@ -53,14 +53,14 @@
     </symbol>
 </svg>
 
-<header id="main-header">
-    <nav aria-label="main navigation">
+<header id="main-header" >
+    <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
             <li><a rel="author" href="./about">About</a></li>
         </ul>
     </nav>
-    <div class="heading">
+    <div class="heading wide">
         <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Lorenzofox's dev blog</h1>
@@ -70,7 +70,9 @@
 </header>
 <main id="main">
     
-<p>Hi! I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
+<div class="intro">
+    <p class="wide">Hi! I am Laurent and this is my dev blog. This is where I collect what I learn, what I experiment and what I find interesting.</p>
+</div>
 
 <section>
 
@@ -84,14 +86,16 @@
     <h3>Controllers on top of coroutine components</h3>
         <p class="publication-date">
             First publication date:
-            <time datetime="2024-03-15">Friday, 15 March 2024</time>
+            <time datetime="2024-03-18">Monday, 18 March 2024</time>
         </p>
     </header>
 
-    <p>We have previously described <a href="./posts/component-as-infinite-loop">a way of modelling custom elements as coroutines (generator functions)</a>.
-We then made sure that they could <a href="./posts/reactive-attributes" rel="prev">be updated efficiently</a>.
-In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call <strong>controllers</strong>.</p>
-    <a rel="bookmark" href="/posts/controllers/">read more</a>
+    <p>
+We have previously described <a href="./posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
+We then made sure that they could <a href="./posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
+In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call <em>controllers</em>.
+    </p>
+    <a rel="bookmark" href="/posts/controllers/">Read article</a>
 </article>
 
 <article class="article-preview">
@@ -103,9 +107,11 @@ In this post, we will look at different patterns for controlling how (and when) 
         </p>
     </header>
 
-    <p>In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
-In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.</p>
-    <a rel="bookmark" href="/posts/reactive-attributes/">read more</a>
+    <p>
+In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
+In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.
+</p>
+    <a rel="bookmark" href="/posts/reactive-attributes/">Read article</a>
 </article>
 
 <article class="article-preview">
@@ -117,9 +123,11 @@ In this post we will iterate by adding reactive attributes to our component defi
         </p>
     </header>
 
-    <p>In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
-In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.</p>
-    <a rel="bookmark" href="/posts/component-as-infinite-loop/">read more</a>
+    <p>
+In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
+In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
+</p>
+    <a rel="bookmark" href="/posts/component-as-infinite-loop/">Read article</a>
 </article>
 
 <article class="article-preview">
@@ -131,15 +139,17 @@ In this article, we will see how coroutines can be used to model web components 
         </p>
     </header>
 
-    <p>A <a href="https://en.wikipedia.org/wiki/Coroutine">coroutine</a> is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.</p>
-    <a rel="bookmark" href="/posts/coroutine/">read more</a>
+    <p>
+    A <a href="https://en.wikipedia.org/wiki/Coroutine">coroutine</a> is a function whose execution can be suspended and resumed, possibly passing some data. They happen to be useful for implementing various patterns involving cooperation between different tasks/functions such as asynchronous flows for example.
+</p>
+    <a rel="bookmark" href="/posts/coroutine/">Read article</a>
 </article>
 
 
 </section>
 
 </main>
-<footer id="main-footer">
+<footer class="wide" id="main-footer">
     <p>© Laurent RENARD. All Rights Reserved.</p>
     <nav aria-labelledby="footer-links">
         <h2 id="footer-links">Author links</h2>

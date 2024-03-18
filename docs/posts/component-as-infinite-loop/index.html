@@ -53,14 +53,14 @@
     </symbol>
 </svg>
 
-<header id="main-header">
-    <nav aria-label="main navigation">
+<header id="main-header" >
+    <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
             <li><a rel="author" href="./about">About</a></li>
         </ul>
     </nav>
-    <div class="heading">
+    <div class="heading wide">
         <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Coroutines and web components</h1>
@@ -74,8 +74,12 @@
     </div>
 </header>
 <main id="main">
-    <p>In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
-In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.</p>
+    <div class="intro"> 
+<p class="wide">
+In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
+In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
+</p>
+</div>
 <h2>Rendering loop</h2>
 <p>Among other things, coroutines have a few properties that we will use in this short essay:</p>
 <ul>
@@ -320,7 +324,7 @@ All we need to do is take advantage of the third property of coroutines mentione
 <p>In <a href="./posts/reactive-attributes" rel="next">the next article</a>, we will see how we can further improve and optimise our generator-to-class conversion.</p>
 
 </main>
-<footer id="main-footer">
+<footer class="wide" id="main-footer">
     <p>© Laurent RENARD. All Rights Reserved.</p>
     <nav aria-labelledby="footer-links">
         <h2 id="footer-links">Author links</h2>
