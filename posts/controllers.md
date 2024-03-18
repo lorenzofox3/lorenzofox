@@ -30,7 +30,7 @@ Let's see what a reactive properties controller might look like:
 ```js
 export const withReactiveProps = (props) => (gen) =>
   function* ({ $host, ...rest }) {
-    const properties = {} || rest.properties;
+    const properties = rest.properties || {};
     const { render } = $host;
 
     $host.render = (update = {}) =>
