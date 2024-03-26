@@ -4,16 +4,28 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-03-21T13:35:50Z</updated>
+  <updated>2024-03-26T09:57:55Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
-    <title>Let&#39;s build a UI framework</title>
-    <link href="https://lorenzofox.dev/posts/lets-build-a-framework/"/>
+    <title>Let&#39;s build a UI framework - part 2/2</title>
+    <link href="https://lorenzofox.dev/posts/lets-build-a-framework-part-2/"/>
+    <updated>2024-03-26T09:57:55Z</updated>
+    <id>https://lorenzofox.dev/posts/lets-build-a-framework-part-2/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;
+&lt;a href=&quot;./posts/lets-build-a-framework-part-1&quot; rel=&quot;prev&quot;&gt;Our framework&lt;/a&gt; seems complete and well thought. We went through the process of building &lt;em&gt;on top of&lt;/em&gt; solid foundations. This is how most of software is written nowadays, yet 
+we suffered a the common bias and added unnecessary complexity. Here we are going to see how removing components can actually be better. 
+&lt;/div&gt;
+&lt;h2&gt;Solving problem by removing layers&lt;/h2&gt;
+&lt;p&gt;We, as human beings, have a tendency to &lt;a href=&quot;https://www.nature.com/articles/d41586-021-00592-0&quot;&gt;solve problems by adding layers and complexity&lt;/a&gt;, even when the most rational approach would be to remove parts of the puzzle.
+That&#39;s exactly what we have been doing so far: combining the bits we had to build a higher level of abstraction.&lt;/p&gt;</content>
+  </entry><entry>
+    <title>Let&#39;s build a UI framework - part 1/2</title>
+    <link href="https://lorenzofox.dev/posts/lets-build-a-framework-part-1/"/>
     <updated>2024-03-21T13:35:50Z</updated>
-    <id>https://lorenzofox.dev/posts/lets-build-a-framework/</id>
+    <id>https://lorenzofox.dev/posts/lets-build-a-framework-part-1/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
 We have now at our disposal a way to &lt;a href=&quot;./posts/component-as-infinite-loop/&quot;&gt;turn coroutines into web components&lt;/a&gt;. We also have a set of higher order functions to &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;manage how a component updates&lt;/a&gt;.
 It is great time to put these small bricks together in an expressive yet simple new UI Framework.
