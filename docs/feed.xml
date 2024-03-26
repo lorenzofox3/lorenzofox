@@ -4,7 +4,7 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-03-26T09:57:55Z</updated>
+  <updated>2024-03-26T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
@@ -12,7 +12,7 @@
   </author><entry>
     <title>Let&#39;s build a UI framework - part 2/2</title>
     <link href="https://lorenzofox.dev/posts/lets-build-a-framework-part-2/"/>
-    <updated>2024-03-26T09:57:55Z</updated>
+    <updated>2024-03-26T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/lets-build-a-framework-part-2/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
 &lt;a href=&quot;./posts/lets-build-a-framework-part-1&quot; rel=&quot;prev&quot;&gt;Our framework&lt;/a&gt; seems complete and well thought out. We went through the process of building &lt;em&gt;on top of&lt;/em&gt; a solid foundation. 
@@ -21,7 +21,7 @@ This is how most software is written these days, but we suffered from the common
   </entry><entry>
     <title>Let&#39;s build a UI framework - part 1/2</title>
     <link href="https://lorenzofox.dev/posts/lets-build-a-framework-part-1/"/>
-    <updated>2024-03-21T13:35:50Z</updated>
+    <updated>2024-03-26T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/lets-build-a-framework-part-1/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
 We have now at our disposal a way to &lt;a href=&quot;./posts/component-as-infinite-loop/&quot;&gt;turn coroutines into web components&lt;/a&gt;. We also have a set of higher order functions to &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;manage how a component updates&lt;/a&gt;.

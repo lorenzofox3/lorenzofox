@@ -1,6 +1,6 @@
 ---
 title: Let's build a UI framework - part 2/2
-#date: 2024-03-18
+date: 2024-03-26
 description: We will remove some of the unnecessary components from our framework. This is a good opportunity to discuss what is the best way to solve problems.  
 ---
 
@@ -210,3 +210,5 @@ Some call it innovation and that is definitely true to an extent, but 10 years a
 JSX, algebraic effects, higher order components, hooks, isomorphic components, Suspense, SSR, Tailwind, css in js, signals and so on. [Landing pages now can weight 13MB of Javascript](https://tonsky.me/blog/js-bloat/) and I don't think this is valuable to the end user.
 
 Building a UI framework is not difficult anymore and if your organisation has the resources to do it, it would be bold but might worth the investment.
+
+For the record, with a toy framework like the one we built, I was able to build a [somewhat complex single page app](https://www.youtube.com/watch?v=clpY08fA0qs) with little effort and with a whole javascript bundle whose size is not even the size of the aforementioned frameworks alone. 
