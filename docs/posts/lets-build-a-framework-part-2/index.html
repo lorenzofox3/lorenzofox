@@ -5,7 +5,7 @@
     
     <base href="https://lorenzofox.dev/"/>
     
-    <meta name="description" content="We will use the various parts around the coroutines we have talked about so far, and we will build a new UI framework from it.">
+    <meta name="description" content="We will remove some of the unnecessary components from our framework. This is a good opportunity to discuss what is the best way to solve problems.">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
     <title>lorenzofox blog | Let's build a UI framework - part 2/2</title>
@@ -70,163 +70,176 @@
 </header>
 <main id="main">
     <div class="intro">
-    <p class="wide">
-<a href="./posts/lets-build-a-framework-part-1" rel="prev">Our framework</a> seems complete and well thought. We went through the process of building <em>on top of</em> solid foundations. This is how most of software is written nowadays, yet 
-we suffered a the common bias and added unnecessary complexity. Here we are going to see how removing components can actually be better. 
+<p class="wide">
+<a href="./posts/lets-build-a-framework-part-1" rel="prev">Our framework</a> seems complete and well thought out. We went through the process of building <em>on top of</em> a solid foundation. 
+This is how most software is written these days, but we suffered from the common bias and added unnecessary complexity. Here we will see how removing components can actually be better.
+</p>
 </div>
 <h2>Solving problem by removing layers</h2>
-<p>We, as human beings, have a tendency to <a href="https://www.nature.com/articles/d41586-021-00592-0">solve problems by adding layers and complexity</a>, even when the most rational approach would be to remove parts of the puzzle.
+<p>We, as human beings, have a tendency
+to <a href="https://www.nature.com/articles/d41586-021-00592-0">solve problems by adding layers and complexity</a>, even when the
+most rational approach would be to remove parts of the puzzle.
 That's exactly what we have been doing so far: combining the bits we had to build a higher level of abstraction.</p>
-<p>Even though this was satisfying, we could have reduced the complexity by simply discarding pieces of code we had written prior to the exercise. There is some evidence that our current solution is not optimal:</p>
+<p>Even though this was satisfying, we could have reduced the complexity by simply discarding pieces of code we had written
+prior to the exercise. There is some evidence that our current solution is not optimal:</p>
 <ol>
-<li>We added some code only to ensure compatibility between interfaces.</li>
-<li>The <code>withController</code> higher order function fails its purpose in the sense that it can't have access to property values set after the component is mounted.</li>
-<li>Although we have a reference to the view model, we still pass the <code>getViewModel</code> function to the <code>withView</code> higher order function. There is no particular reason to rely on the injection into the rendering loop since we can pass the view model directly to the generator.</li>
+<li>We added some code only to ensure compatibility between interfaces, but there is not much complexity behind these interfaces: they are 20 lines functions we have control over.</li>
+<li>The <code>withController</code> higher order function fails its purpose in the sense that it can't have access to property
+values set after the component is mounted.</li>
+<li>Although we have a reference to the view model, we still pass the <code>getViewModel</code> function to the <code>withView</code>
+higher order function. There is no particular reason to rely on the injection into the rendering loop since we can
+pass the view model directly to the generator.</li>
 <li><code>withController</code> uses a proxy, but at this point, we know the shape of the view model.</li>
 </ol>
 <p>Let's go back to the beginning by creating the view model based on the <code>data</code> function:</p>
-<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">withData</span> <span class="token operator">=</span>
-  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> data <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
-  <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span>
-    <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> $host<span class="token punctuation">,</span> <span class="token operator">...</span>rest <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token keyword">const</span> viewModelValues <span class="token operator">=</span> <span class="token function">data</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">const</span> viewModel <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">withData</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>data<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> viewModelValues <span class="token operator">=</span> <span class="token function">data</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> viewModel <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>
         <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
         Object<span class="token punctuation">.</span><span class="token function">fromEntries</span><span class="token punctuation">(</span>
-          Object<span class="token punctuation">.</span><span class="token function">keys</span><span class="token punctuation">(</span>viewModelValues<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">key</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">[</span>
-            key<span class="token punctuation">,</span>
-            <span class="token punctuation">{</span>
-              <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-              <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">return</span> viewModelValues<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>
-              <span class="token punctuation">}</span><span class="token punctuation">,</span>
-              <span class="token function">set</span><span class="token punctuation">(</span>newValue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                viewModelValues<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> newValue<span class="token punctuation">;</span>
-                $host<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-              <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-          <span class="token punctuation">]</span><span class="token punctuation">)</span>
+            Object<span class="token punctuation">.</span><span class="token function">keys</span><span class="token punctuation">(</span>viewModelValues<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">key</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">[</span>
+                key<span class="token punctuation">,</span>
+                <span class="token punctuation">{</span>
+                    <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                    <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">return</span> viewModelValues<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    <span class="token function">set</span><span class="token punctuation">(</span>newValue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        viewModelValues<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> newValue<span class="token punctuation">;</span>
+                        $host<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">]</span><span class="token punctuation">)</span>
         <span class="token punctuation">)</span>
-      <span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
         <span class="token operator">...</span>rest<span class="token punctuation">,</span>
         $host<span class="token punctuation">,</span>
         viewModel
-      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
-<p>It creates the view model based on the return value of the <code>data</code> function. This time, we use property descriptors instead of a proxy as we know the shape of the expected view model.
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>It creates the view model based on the return value of the <code>data</code> function. This time, we use property descriptors
+instead of a proxy as we know the shape of the expected view model.
 Finally, we delegate the control to the next generator while providing the view model.</p>
 <p>The next one defines the computed:</p>
-<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">withComputed</span> <span class="token operator">=</span>
-  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> computed <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
-  <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span>
-    <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> viewModel<span class="token punctuation">,</span> <span class="token operator">...</span>rest <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">withComputed</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>computed<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>viewModel<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>
         viewModel<span class="token punctuation">,</span>
         <span class="token function">mapValues</span><span class="token punctuation">(</span>
-          <span class="token punctuation">(</span><span class="token parameter">method</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
-            <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-            <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-              <span class="token keyword">return</span> <span class="token function">method</span><span class="token punctuation">(</span>viewModel<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-          computed
-        <span class="token punctuation">)</span>
-      <span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-        <span class="token operator">...</span>rest<span class="token punctuation">,</span>
-        viewModel<span class="token punctuation">,</span>
-      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
-<p>Not much has changed here.</p>
-<p>The last missing part of the view model comes from the properties:</p>
-<pre class="language-js"><code class="language-js"><span class="token function-variable function">withProps</span> <span class="token operator">=</span>
-  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> props <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
-  <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span>
-    <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> $host<span class="token punctuation">,</span> viewModel<span class="token punctuation">,</span> <span class="token operator">...</span>rest <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>
-        $host<span class="token punctuation">,</span>
-        Object<span class="token punctuation">.</span><span class="token function">fromEntries</span><span class="token punctuation">(</span>
-          props<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">propName</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
-            viewModel<span class="token punctuation">[</span>propName<span class="token punctuation">]</span> <span class="token operator">=</span> $host<span class="token punctuation">[</span>propName<span class="token punctuation">]</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> <span class="token punctuation">[</span>
-              propName<span class="token punctuation">,</span>
-              <span class="token punctuation">{</span>
+            <span class="token punctuation">(</span><span class="token parameter">method</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
                 <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
                 <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                  <span class="token keyword">return</span> viewModel<span class="token punctuation">[</span>propName<span class="token punctuation">]</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span><span class="token punctuation">,</span>
-                <span class="token function">set</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                  viewModel<span class="token punctuation">[</span>propName<span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">;</span>
-                  $host<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">return</span> <span class="token function">method</span><span class="token punctuation">(</span>viewModel<span class="token punctuation">)</span><span class="token punctuation">;</span>
                 <span class="token punctuation">}</span>
-              <span class="token punctuation">}</span>
-            <span class="token punctuation">]</span><span class="token punctuation">;</span>
-          <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            computed
         <span class="token punctuation">)</span>
-      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token operator">...</span>rest<span class="token punctuation">,</span>
+        viewModel
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>Not much has changed here.</p>
+<p>The last missing part of the view model comes from the properties:</p>
+<pre class="language-js"><code class="language-js"><span class="token function-variable function">withProps</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>props<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> viewModel<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>
+        $host<span class="token punctuation">,</span>
+        Object<span class="token punctuation">.</span><span class="token function">fromEntries</span><span class="token punctuation">(</span>
+            props<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">propName</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+                viewModel<span class="token punctuation">[</span>propName<span class="token punctuation">]</span> <span class="token operator">=</span> $host<span class="token punctuation">[</span>propName<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token keyword">return</span> <span class="token punctuation">[</span>
+                    propName<span class="token punctuation">,</span>
+                    <span class="token punctuation">{</span>
+                        <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                        <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token keyword">return</span> viewModel<span class="token punctuation">[</span>propName<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                        <span class="token function">set</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            viewModel<span class="token punctuation">[</span>propName<span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">;</span>
+                            $host<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-      <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
         <span class="token operator">...</span>rest<span class="token punctuation">,</span>
         $host<span class="token punctuation">,</span>
         viewModel
-      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
 <p>Once again, no changes here, except that the meta object is directly <code>viewModel</code></p>
-<p>We did not need to override the host <code>render</code> function because we pass directly a reference to <code>viewModel</code> to the next generator.</p>
+<p>We did not need to override the host <code>render</code> function because we pass directly a reference to <code>viewModel</code> to the
+next generator.</p>
 <p>The last step is to build the component from the <code>mounted</code>, the <code>controller</code> and the <code>template</code> functions:</p>
-<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> render <span class="token keyword">as</span> litRender <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'lit-html'</span><span class="token punctuation">;</span>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>render <span class="token keyword">as</span> litRender<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'lit-html'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> <span class="token function-variable function">component</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> template<span class="token punctuation">,</span> mounted<span class="token punctuation">,</span> <span class="token literal-property property">controller</span><span class="token operator">:</span> controllerFn <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
-  <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> $host<span class="token punctuation">,</span> viewModel <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// constructing...</span>
-    <span class="token keyword">yield</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token function-variable function">component</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>template<span class="token punctuation">,</span> mounted<span class="token punctuation">,</span> <span class="token literal-property property">controller</span><span class="token operator">:</span> controllerFn<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
+    <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> viewModel<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// constructing...</span>
+        <span class="token keyword">yield</span><span class="token punctuation">;</span>
 
-    <span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token function">controllerFn</span><span class="token punctuation">(</span><span class="token punctuation">{</span> viewModel <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token function">controllerFn</span><span class="token punctuation">(</span><span class="token punctuation">{</span>viewModel<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token comment">// on mount</span>
-    <span class="token function">mounted</span><span class="token punctuation">(</span><span class="token punctuation">{</span> viewModel<span class="token punctuation">,</span> controller <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// on mount</span>
+        <span class="token function">mounted</span><span class="token punctuation">(</span><span class="token punctuation">{</span>viewModel<span class="token punctuation">,</span> controller<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token function">litRender</span><span class="token punctuation">(</span><span class="token function">template</span><span class="token punctuation">(</span><span class="token punctuation">{</span> viewModel<span class="token punctuation">,</span> controller <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span> $host<span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">yield</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-  <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
-<p>When the component yields, there is no need to inject data as the view model is already passed when the generator is instantiated.
-Another interesting point is that we have completely discarded the <code>withController</code> higher order function. We can instantiate the controller just after the component is mounted: this means it will see the <code>step</code> property while being instantiated!</p>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token function">litRender</span><span class="token punctuation">(</span><span class="token function">template</span><span class="token punctuation">(</span><span class="token punctuation">{</span>viewModel<span class="token punctuation">,</span> controller<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span> $host<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">yield</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>When the component yields, there is no need to inject data as the view model is already passed when the generator is
+instantiated.
+Another interesting point is that we have completely discarded the <code>withController</code> higher order function. We can
+instantiate the controller just after the component is mounted: this means it will see the <code>step</code> property while being
+instantiated!</p>
 <p>Putting all together:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">defineComponent</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>
-  tag<span class="token punctuation">,</span>
-  props<span class="token punctuation">,</span>
-  data<span class="token punctuation">,</span>
-  computed<span class="token punctuation">,</span>
-  mounted<span class="token punctuation">,</span>
-  controller<span class="token punctuation">,</span>
-  template<span class="token punctuation">,</span>
-<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> withViewModel <span class="token operator">=</span> <span class="token function">compose</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
-    <span class="token function">withData</span><span class="token punctuation">(</span><span class="token punctuation">{</span> data <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-    <span class="token function">withComputed</span><span class="token punctuation">(</span><span class="token punctuation">{</span> computed <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-    <span class="token function">withProps</span><span class="token punctuation">(</span><span class="token punctuation">{</span> props <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                             tag<span class="token punctuation">,</span>
+                             props<span class="token punctuation">,</span>
+                             data<span class="token punctuation">,</span>
+                             computed<span class="token punctuation">,</span>
+                             mounted<span class="token punctuation">,</span>
+                             controller<span class="token punctuation">,</span>
+                             template
+                         <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> withViewModel <span class="token operator">=</span> <span class="token function">compose</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+        <span class="token function">withData</span><span class="token punctuation">(</span><span class="token punctuation">{</span>data<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">withComputed</span><span class="token punctuation">(</span><span class="token punctuation">{</span>computed<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">withProps</span><span class="token punctuation">(</span><span class="token punctuation">{</span>props<span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  <span class="token function">define</span><span class="token punctuation">(</span>
-    tag<span class="token punctuation">,</span>
-    <span class="token function">withViewModel</span><span class="token punctuation">(</span>
-      <span class="token function">component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-        template<span class="token punctuation">,</span>
-        mounted<span class="token punctuation">,</span>
-        controller<span class="token punctuation">,</span>
-      <span class="token punctuation">}</span><span class="token punctuation">)</span>
-    <span class="token punctuation">)</span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">define</span><span class="token punctuation">(</span>
+        tag<span class="token punctuation">,</span>
+        <span class="token function">withViewModel</span><span class="token punctuation">(</span>
+            <span class="token function">component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+                template<span class="token punctuation">,</span>
+                mounted<span class="token punctuation">,</span>
+                controller
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
-<p>This is much simpler than our first solution.</p>
-<p>You can find all the code in <a href="https://stackblitz.com/edit/vitejs-vite-ynjvdt?file=framework%2Findex.js">this stackblitz</a> along with the Vuejs version.</p>
-<p>The bundle generated is four to five times lighter than the Vuejs version. The framework itself is not even 200 lines of code (beside lit-html) yet offers most of the Vuejs features (we don't yet have quite the same experience of development).</p>
+<p>This solution is much simpler than the first, yet follows the same guiding principle, namely the composition of small, specialised parts.</p>
+<p>You can find all the code in <a href="https://stackblitz.com/edit/vitejs-vite-ynjvdt?file=framework%2Findex.js">this stackblitz</a>
+along with the Vuejs version.</p>
+<p>The bundle generated is four to five times lighter than the Vuejs version. The framework itself is not even 200 lines of
+code (beside lit-html) yet offers most of the Vuejs features (we don't yet have quite the same experience of
+development).</p>
 <h2>In defence of reinventing the wheel</h2>
-<p>fasfd</p>
-<h2>Conclusion</h2>
+<p>It is often said that you should not reinvent the wheel, and this is probably true, especially if the <em>wheel</em> is not your core business: building a new UI framework does not necessarily bring value to your users.
+The problem a tool or framework solves may be complex in itself, and there is no reason for you to solve it by yourself: our framework, for example, relies on lit-html for the templating part.</p>
+<p>However, as I said earlier, a framework is more the expression of a human organisation, and whatever are the <em>shoulders of giants</em> you stand on, you will add some conventions and patterns of your own.
+But all those additions will come &quot;<em>on top of</em>&quot;, and that is inherently wrong. Not only do you not control the codebase of React, Vue, Angular and so on. But the codebase of these frameworks is massive and difficult to penetrate.
+Ironically, they all solve the same problem, in different ways. Every layer you add is an extra layer of complexity until you get to the point where the system is too complex for you to remove parts of it like we did for our framework.</p>
+<p>It feels like the people behind React and co are representing a standard, a wider community, and the industry wisdom. But is that ultimately true ? Aren't they reinventing the wheel for you ? Trends and tools come and go for good or bad reasons.
+Some call it innovation and that is definitely true to an extent, but 10 years ago you could solve more or less the same problems without
+JSX, algebraic effects, higher order components, hooks, isomorphic components, Suspense, SSR, Tailwind, css in js, signals and so on. <a href="https://tonsky.me/blog/js-bloat/">Landing pages now can weight 13MB of Javascript</a> and I don't think this is valuable to the end user.</p>
+<p>Building a UI framework is not difficult anymore and if your organisation has the resources to do it, it would be bold but might worth the investment.</p>
 
 </main>
 <footer class="wide" id="main-footer">
