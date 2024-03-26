@@ -247,7 +247,7 @@ a {
 }
 
 
-p > code {
+:is(p, li) > code {
     --_color: color-mix(in lab, var(--bg-app) 85%, var(--mix));
     background: var(--_color, lightgray);
     padding-inline: 0.25em;
