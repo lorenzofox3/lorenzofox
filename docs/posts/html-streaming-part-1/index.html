@@ -110,7 +110,7 @@ What <code>html</code> does or returns is then left to your imagination.</p>
 </ul>
 <p>The <a href="https://github.com/lorenzofox3/tpl-stream/">actual library</a> has actually more extensive specifications, but they are not relevant to this article.</p>
 <h3>Implementation</h3>
-<p>To build a sequence we will use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*">generator function</a>(you probably know that I am a big fan of generators). We will do something close to TDD(Test Driven Development) to see the evolution of our implementation.</p>
+<p>To build a sequence we will use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*">generator function</a>(you probably know that I am a big fan of generators). We will do something close to <a href="https://en.wikipedia.org/wiki/Test-driven_development">TDD(Test Driven Development)</a> to see the evolution of our implementation.</p>
 <h4>Interpolate literals</h4>
 <pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>test<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'zora'</span><span class="token punctuation">;</span>
 
@@ -228,7 +228,42 @@ We leave that job to the upcoming <code>render</code> function</p>
 <p>Anything that can be awaited implement <code>then</code>. If this check passes we just yield the &quot;Promise like&quot; value to the <code>render</code> function:
 there is nothing we can do at this point, and the strategy for handling asynchronous structures may vary form renderer to renderer.</p>
 <h2>render function</h2>
-<p>blah blah</p>
+<p>Now that we have a sequence that has already been partially converted into bits of strings, we can convert that sequence into a proper stream. This will also be the time
+to handle late-arriving values (such as what promises resolve to), and eventually reject unsupported chunks.</p>
+<p>There is a one-to-one relationship between a stream and an async generator. Again, we will use the latter to take advantage of recursivity, delegation, etc.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">async</span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token function">_render</span><span class="token punctuation">(</span><span class="token parameter">template</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunk <span class="token keyword">of</span> template<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> chunk <span class="token operator">===</span> <span class="token string">'string'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">yield</span> chunk<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>chunk<span class="token operator">?.</span>then<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">_render</span><span class="token punctuation">(</span><span class="token keyword">await</span> chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>chunk<span class="token operator">?.</span><span class="token punctuation">[</span>Symbol<span class="token punctuation">.</span>iterator<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">_render</span><span class="token punctuation">(</span>chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>   <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Unsupported chunk'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">render</span><span class="token punctuation">(</span><span class="token parameter">template</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> ReadableStream<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token function">_render</span><span class="token punctuation">(</span>template<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">renderAsString</span><span class="token punctuation">(</span><span class="token parameter">template</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunk <span class="token keyword">of</span> <span class="token function">render</span><span class="token punctuation">(</span>template<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        buffer<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">return</span> buffer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Let's focus on the <code>_render</code> generator (the other functions will just convert it into other data structures). It takes an iterable (like a template!) as a parameter and iterates over its sequence.
+By this point, all the literals should already have been converted to strings, and that is our first check.</p>
+<p>If it hits a Promise, we are now in an asynchronous context and can wait for it to resolve. We can then recursively delegate to the generator.</p>
+<p>In the third check, we convert nested arrays or templates(and arrays) that could have been resolved by a Promise. Finally, we throw an error for any other chunk type: this prevents,
+for example, to have arrays with number elements or any other invalid literal elements.</p>
+<p>All in all, the code is concise and fairly easy to follow, but...</p>
+<h2>Performances evaluation</h2>
 
 </main>
 <footer class="wide" id="main-footer">

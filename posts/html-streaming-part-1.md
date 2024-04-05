@@ -61,7 +61,7 @@ The [actual library](https://github.com/lorenzofox3/tpl-stream/) has actually mo
 
 ### Implementation
 
-To build a sequence we will use a [generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*)(you probably know that I am a big fan of generators). We will do something close to TDD(Test Driven Development) to see the evolution of our implementation.
+To build a sequence we will use a [generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*)(you probably know that I am a big fan of generators). We will do something close to [TDD(Test Driven Development)](https://en.wikipedia.org/wiki/Test-driven_development) to see the evolution of our implementation.
 
 #### Interpolate literals
 
@@ -206,4 +206,50 @@ there is nothing we can do at this point, and the strategy for handling asynchro
 
 ## render function
 
-blah blah
+Now that we have a sequence that has already been partially converted into bits of strings, we can convert that sequence into a proper stream. This will also be the time
+to handle late-arriving values (such as what promises resolve to), and eventually reject unsupported chunks.
+
+There is a one-to-one relationship between a stream and an async generator. Again, we will use the latter to take advantage of recursivity, delegation, etc.
+
+```js
+async function* _render(template) {
+    for (const chunk of template) {
+        if (typeof chunk === 'string') {
+            yield chunk;
+        } else if (chunk?.then) {
+            yield* _render(await chunk);
+        } else if (chunk?.[Symbol.iterator]) {
+            yield* _render(chunk);
+        }   else {
+            throw new Error('Unsupported chunk');
+        }
+    }
+}
+
+export function render(template) {
+    return ReadableStream.from(_render(template));
+}
+
+export async function renderAsString(template) {
+    const buffer = [];
+    for await (const chunk of render(template)){
+        buffer.push(chunk);
+    }
+    
+    return buffer.join('');
+}
+```
+
+Let's focus on the ``_render`` generator (the other functions will just convert it into other data structures). It takes an iterable (like a template!) as a parameter and iterates over its sequence.
+By this point, all the literals should already have been converted to strings, and that is our first check. 
+
+If it hits a Promise, we are now in an asynchronous context and can wait for it to resolve. We can then recursively delegate to the generator.
+
+In the third check, we convert nested arrays or templates(and arrays) that could have been resolved by a Promise. Finally, we throw an error for any other chunk type: this prevents,
+for example, to have arrays with number elements or any other invalid literal elements.
+
+All in all, the code is concise and fairly easy to follow, but...
+
+## Performances evaluation
+
+
