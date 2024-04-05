@@ -250,6 +250,159 @@ for example, to have arrays with number elements or any other invalid literal el
 
 All in all, the code is concise and fairly easy to follow, but...
 
-## Performances evaluation
+## Performance evaluation
+
+To evaluate the performance of our library, we will use a _real-world_ application: we will build a blog like the one you are reading at the moment, using [fastify](https://fastify.dev/) for the backend, with different template engines.
+[pug](https://pugjs.org), the library I would have used by default; and [ejs](https://ejs.co/), which seems to be quite popular with 13M download every week, will be our baselines.
+
+<figure>
+<img src="https://github.com/lorenzofox3/tpl-stream/assets/2402022/cc021ce7-5405-4690-8d9b-43904fb05c45" alt="screen shot of the blog application" />
+<figcaption>screenshot of the test application</figcaption>
+</figure>
+
+### Code base with our library
+
+The interesting thing about our library is that we can combine templates together using all the scripting abilities of Javascript.
+
+```js
+// layout.js
+import {html} from 'tpl-stream'
+import {Navigation} from './navigation.js'
+
+export const Page = ({ title, content }) => html`
+  <!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <link href="/public/main.css" rel="stylesheet" type="text/css" />
+      <link rel="icon" href="./public/favicon.ico" />
+      <title>${title}</title>
+    </head>
+    <body>
+      <header id="main-header">
+        <img id="logo" alt="blog logo" src="/public/logo.webp" />
+        <h1>${title}</h1>
+        ${Navigation({ currentPage: '/blog' })}
+      </header>
+      <main>
+        <p>
+          Hi! I am Laurent and this is my dev blog. This is where I collect what
+          I learn, what I experiment and what I find interesting.
+        </p>
+        ${content}
+      </main>
+      <footer><p>© Laurent RENARD. All Rights Reserved.</p></footer>
+    </body>
+  </html>
+`;
+```
+
+where ``Navigation`` is 
+
+```js
+// navigation.js
+import {html} from 'tpl-stream'
+
+
+const links = [
+    { href: '/', name: 'Home' },
+    { href: '/blog', name: 'Blog' },
+    { href: '/about', name: 'About' },
+];
+
+const NavigationLink = ({ name, href, ...rest }) =>
+    html`<li><a href="${href}" ${rest}}>${name}</a></li>`;
+
+const Navigation = ({ currentPage = '/' }) =>
+    html`<nav>
+    <ul>
+      ${links.map((linkDef) =>
+        NavigationLink({
+            ...linkDef,
+            ['aria-current']: currentPage === linkDef.href ? 'page' : false,
+        }),
+    )}
+    </ul>
+  </nav>`;
+```
+
+You will have noticed in ``NavigationLink`` that this version of ``html`` can interpolate objects: each key-value pair becomes an attribute if the value is not equal to ``false``
+(we left this feature out of this article to keep it more concise).
+
+The content that will be rendered in the layout comes from:
+
+```js
+import { html } from 'tpl-stream';
+
+const BlogPost = ({
+  title,
+  author,
+  description,
+  publicationDate,
+  permalink,
+}) => html`
+  <article class="post-preview">
+    <h3>${title}</h3>
+    <p class="meta">
+      Published by ${author} on <time>${formatDate(publicationDate)}</time>
+    </p>
+    <p>${description}</p>
+    <a rel="bookmark" href="${permalink}">Read full article</a>
+  </article>
+`;
+
+export const Blog = ({ posts }) =>
+  html`<section>
+    <h2>Latest articles</h2>
+    ${posts.map(BlogPost)}
+  </section>`;
+```
+
+So that the request handler looks like:
+
+```js
+import {render} from 'tpl-stream';
+//... 
+
+return render(
+    Page({
+        title: 'Blog',
+        content: getPosts().then((posts) => Blog({ posts })),
+    }),
+);
+
+//...
+```
+
+The posts are loaded with the code below, to fake a database latency and make it more realistic:
+
+```js
+const LATENCY = env.DB_LATENCY || 10;
+
+export async function getPosts() {
+  const latency = Math.round(Math.random() * LATENCY); // between 0 and 10ms of latency
+  await setTimeout(latency);
+  return [...postList];
+}
+```
+
+### Load test
+
+We use [autocannon](https://github.com/mcollina/autocannon) to perform the load test and see how many requests per second the server can handle.
+We get the following results (median requests per second): 
+
+| tpl-stream | pug | ejs |
+|------------|-----|-----|
+| 238        | 1632| 670 |
+
+This is pretty bad and gets worst the more complicated the page is. Nothing to worry about, we will fix the performance issues in the next article.
+
+## Conclusion
+
+In this article we have learned what HTML streaming is. We have built a templating engine that supports streaming, with a straightforward implementation (less than 100 SLOC). 
+The API gives us a lot of flexibility, and it is fairly easy and pleasant to work with. Unfortunately, our naive implementation performs poorly compared to the baselines made with popular libraries from the ecosystem. 
+In the next post we will fix these performance issues, and hopefully learn a few things along the way.
+
 
 

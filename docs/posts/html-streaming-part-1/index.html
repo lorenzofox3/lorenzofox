@@ -263,7 +263,142 @@ By this point, all the literals should already have been converted to strings, a
 <p>In the third check, we convert nested arrays or templates(and arrays) that could have been resolved by a Promise. Finally, we throw an error for any other chunk type: this prevents,
 for example, to have arrays with number elements or any other invalid literal elements.</p>
 <p>All in all, the code is concise and fairly easy to follow, but...</p>
-<h2>Performances evaluation</h2>
+<h2>Performance evaluation</h2>
+<p>To evaluate the performance of our library, we will use a <em>real-world</em> application: we will build a blog like the one you are reading at the moment, using <a href="https://fastify.dev/">fastify</a> for the backend, with different template engines.
+<a href="https://pugjs.org">pug</a>, the library I would have used by default; and <a href="https://ejs.co/">ejs</a>, which seems to be quite popular with 13M download every week, will be our baselines.</p>
+<figure>
+<img src="https://github.com/lorenzofox3/tpl-stream/assets/2402022/cc021ce7-5405-4690-8d9b-43904fb05c45" alt="screen shot of the blog application" />
+<figcaption>screenshot of the test application</figcaption>
+</figure>
+<h3>Code base with our library</h3>
+<p>The interesting thing about our library is that we can combine templates together using all the scripting abilities of Javascript.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// layout.js</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>html<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tpl-stream'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>Navigation<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./navigation.js'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">Page</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> title<span class="token punctuation">,</span> content <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+  &lt;!doctype html>
+  &lt;html>
+    &lt;head>
+      &lt;meta charset="utf-8" />
+      &lt;meta name="viewport" content="width=device-width,initial-scale=1" />
+      &lt;link href="/public/main.css" rel="stylesheet" type="text/css" />
+      &lt;link rel="icon" href="./public/favicon.ico" />
+      &lt;title></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>title<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/title>
+    &lt;/head>
+    &lt;body>
+      &lt;header id="main-header">
+        &lt;img id="logo" alt="blog logo" src="/public/logo.webp" />
+        &lt;h1></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>title<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/h1>
+        </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">Navigation</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">currentPage</span><span class="token operator">:</span> <span class="token string">'/blog'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">
+      &lt;/header>
+      &lt;main>
+        &lt;p>
+          Hi! I am Laurent and this is my dev blog. This is where I collect what
+          I learn, what I experiment and what I find interesting.
+        &lt;/p>
+        </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>content<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">
+      &lt;/main>
+      &lt;footer>&lt;p>© Laurent RENARD. All Rights Reserved.&lt;/p>&lt;/footer>
+    &lt;/body>
+  &lt;/html>
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span></code></pre>
+<p>where <code>Navigation</code> is</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// navigation.js</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>html<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tpl-stream'</span>
+
+
+<span class="token keyword">const</span> links <span class="token operator">=</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">href</span><span class="token operator">:</span> <span class="token string">'/'</span><span class="token punctuation">,</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Home'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">href</span><span class="token operator">:</span> <span class="token string">'/blog'</span><span class="token punctuation">,</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Blog'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">href</span><span class="token operator">:</span> <span class="token string">'/about'</span><span class="token punctuation">,</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'About'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">NavigationLink</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> name<span class="token punctuation">,</span> href<span class="token punctuation">,</span> <span class="token operator">...</span>rest <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
+    html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;li>&lt;a href="</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>href<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">" </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>rest<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">}></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>name<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/a>&lt;/li></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> Navigation <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> currentPage <span class="token operator">=</span> <span class="token string">'/'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+    html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;nav>
+    &lt;ul>
+      </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>links<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">linkDef</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+        <span class="token function">NavigationLink</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            <span class="token operator">...</span>linkDef<span class="token punctuation">,</span>
+            <span class="token punctuation">[</span><span class="token string">'aria-current'</span><span class="token punctuation">]</span><span class="token operator">:</span> currentPage <span class="token operator">===</span> linkDef<span class="token punctuation">.</span>href <span class="token operator">?</span> <span class="token string">'page'</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">
+    &lt;/ul>
+  &lt;/nav></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span></code></pre>
+<p>You will have noticed in <code>NavigationLink</code> that this version of <code>html</code> can interpolate objects: each key-value pair becomes an attribute if the value is not equal to <code>false</code>
+(we left this feature out of this article to keep it more concise).</p>
+<p>The content that will be rendered in the layout comes from:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> html <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tpl-stream'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">BlogPost</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>
+  title<span class="token punctuation">,</span>
+  author<span class="token punctuation">,</span>
+  description<span class="token punctuation">,</span>
+  publicationDate<span class="token punctuation">,</span>
+  permalink<span class="token punctuation">,</span>
+<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+  &lt;article class="post-preview">
+    &lt;h3></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>title<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/h3>
+    &lt;p class="meta">
+      Published by </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>author<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> on &lt;time></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">formatDate</span><span class="token punctuation">(</span>publicationDate<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/time>
+    &lt;/p>
+    &lt;p></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>description<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/p>
+    &lt;a rel="bookmark" href="</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>permalink<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">">Read full article&lt;/a>
+  &lt;/article>
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">Blog</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> posts <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span>
+  html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;section>
+    &lt;h2>Latest articles&lt;/h2>
+    </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>posts<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>BlogPost<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">
+  &lt;/section></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span></code></pre>
+<p>So that the request handler looks like:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>render<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tpl-stream'</span><span class="token punctuation">;</span>
+<span class="token comment">//... </span>
+
+<span class="token keyword">return</span> <span class="token function">render</span><span class="token punctuation">(</span>
+    <span class="token function">Page</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token literal-property property">title</span><span class="token operator">:</span> <span class="token string">'Blog'</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">content</span><span class="token operator">:</span> <span class="token function">getPosts</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">posts</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">Blog</span><span class="token punctuation">(</span><span class="token punctuation">{</span> posts <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">//...</span></code></pre>
+<p>The posts are loaded with the code below, to fake a database latency and make it more realistic:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token constant">LATENCY</span> <span class="token operator">=</span> env<span class="token punctuation">.</span><span class="token constant">DB_LATENCY</span> <span class="token operator">||</span> <span class="token number">10</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getPosts</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> latency <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token constant">LATENCY</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// between 0 and 10ms of latency</span>
+  <span class="token keyword">await</span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>latency<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span>postList<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h3>Load test</h3>
+<p>We use <a href="https://github.com/mcollina/autocannon">autocannon</a> to perform the load test and see how many requests per second the server can handle.
+We get the following results (median requests per second):</p>
+<table>
+<thead>
+<tr>
+<th>tpl-stream</th>
+<th>pug</th>
+<th>ejs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>238</td>
+<td>1632</td>
+<td>670</td>
+</tr>
+</tbody>
+</table>
+<p>This is pretty bad and gets worst the more complicated the page is. Nothing to worry about, we will fix the performance issues in the next article.</p>
+<h2>Conclusion</h2>
+<p>In this article we have learned what HTML streaming is. We have built a templating engine that supports streaming, with a straightforward implementation (less than 100 SLOC).
+The API gives us a lot of flexibility, and it is fairly easy and pleasant to work with. Unfortunately, our naive implementation performs poorly compared to the baselines made with popular libraries from the ecosystem.
+In the next post we will fix these performance issues, and hopefully learn a few things along the way.</p>
 
 </main>
 <footer class="wide" id="main-footer">
