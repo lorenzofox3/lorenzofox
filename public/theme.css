@@ -49,6 +49,7 @@ canvas {
     --gray: #1e1e1e;
     --mix: #142334;
     --accent: #1c5aab;
+    --shadow-color: #777777;
 
     --secondary-color: #31363b;
     --secondary-font-color: #eeeeee;
@@ -65,16 +66,42 @@ body {
     line-height: 1.5;
 }
 
+figure {
+    margin-block: 1em;
+
+    > img {
+        box-shadow: 0 0.25em 0.4em 0 var(--shadow-color);
+    }
+
+    figcaption {
+        font-size: 0.85em;
+        padding: 0.5em;
+        text-align: center;
+    }
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid currentColor;
+    text-align: center;
+}
+
+
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: dark;
-        --bg-app: #132431;
+        --bg-app: #182d3e;
         --gray: #ececec;
         --accent: #96bffa;
         --mix: #ffffff;
 
         --secondary-color: #353c42;
         --secondary-font-color: #eeeeee;
+        --shadow-color: #151515;
+
     }
 }
 
@@ -128,7 +155,7 @@ body {
 main {
     margin-block-end: 2em;
     display: grid;
-    grid-template-columns: minmax(var(--min-inline-margin), 1fr) min(100% - 2 * var(--min-inline-margin) , var(--max-content-width)) minmax(var(--min-inline-margin), 1fr);
+    grid-template-columns: minmax(var(--min-inline-margin), 1fr) min(100% - 2 * var(--min-inline-margin), var(--max-content-width)) minmax(var(--min-inline-margin), 1fr);
 
     & > * {
         grid-column: 2 / 2;

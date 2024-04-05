@@ -4,12 +4,22 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-03-26T00:00:00Z</updated>
+  <updated>2024-04-04T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
+    <title>Template engine with streaming capability</title>
+    <link href="https://lorenzofox.dev/posts/html-streaming-part-1/"/>
+    <updated>2024-04-04T00:00:00Z</updated>
+    <id>https://lorenzofox.dev/posts/html-streaming-part-1/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;
+Browsers can render HTML on the fly as chunks of text arrive. This is called HTML streaming, and it is not new. 
+I recently read Chris Haynes&#39; article explaining how you can &lt;a href=&quot;https://lamplightdev.com/blog/2024/01/10/streaming-html-out-of-order-without-javascript/&quot;&gt;stream HTML out of order (OOO) without JavaScript&lt;/a&gt;. 
+This opens up a lot of possibilities and new patterns at low cost. However, I have not found much in the way of simple yet efficient template engine libraries with streaming support. Let&#39;s build one!
+&lt;/p&gt;</content>
+  </entry><entry>
     <title>Let&#39;s build a UI framework - part 2/2</title>
     <link href="https://lorenzofox.dev/posts/lets-build-a-framework-part-2/"/>
     <updated>2024-03-26T00:00:00Z</updated>
