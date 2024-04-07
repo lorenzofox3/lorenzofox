@@ -6,7 +6,7 @@ description: We will remove some of the unnecessary components from our framewor
 
 <div class="intro">
 <p class="wide">
-<a href="./posts/lets-build-a-framework-part-1" rel="prev">Our framework</a> seems complete and well thought out. We went through the process of building <em>on top of</em> a solid foundation. 
+<a href="/posts/lets-build-a-framework-part-1" rel="prev">Our framework</a> seems complete and well thought out. We went through the process of building <em>on top of</em> a solid foundation. 
 This is how most software is written these days, but we suffered from the common bias and added unnecessary complexity. Here we will see how removing components can actually be better.
 </p>
 </div>

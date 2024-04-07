@@ -25,7 +25,7 @@ This opens up a lot of possibilities and new patterns at low cost. However, I ha
     <updated>2024-03-26T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/lets-build-a-framework-part-2/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
-&lt;a href=&quot;./posts/lets-build-a-framework-part-1&quot; rel=&quot;prev&quot;&gt;Our framework&lt;/a&gt; seems complete and well thought out. We went through the process of building &lt;em&gt;on top of&lt;/em&gt; a solid foundation. 
+&lt;a href=&quot;/posts/lets-build-a-framework-part-1&quot; rel=&quot;prev&quot;&gt;Our framework&lt;/a&gt; seems complete and well thought out. We went through the process of building &lt;em&gt;on top of&lt;/em&gt; a solid foundation. 
 This is how most software is written these days, but we suffered from the common bias and added unnecessary complexity. Here we will see how removing components can actually be better.
 &lt;/p&gt;</content>
   </entry><entry>
@@ -34,7 +34,7 @@ This is how most software is written these days, but we suffered from the common
     <updated>2024-03-26T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/lets-build-a-framework-part-1/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
-We have now at our disposal a way to &lt;a href=&quot;./posts/component-as-infinite-loop/&quot;&gt;turn coroutines into web components&lt;/a&gt;. We also have a set of higher order functions to &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;manage how a component updates&lt;/a&gt;.
+We have now at our disposal a way to &lt;a href=&quot;/posts/component-as-infinite-loop/&quot;&gt;turn coroutines into web components&lt;/a&gt;. We also have a set of higher order functions to &lt;a href=&quot;/posts/component-as-infinite-loop&quot;&gt;manage how a component updates&lt;/a&gt;.
 It is great time to put these small bricks together in an expressive yet simple new UI Framework.
     &lt;/p&gt;</content>
   </entry><entry>
@@ -43,8 +43,8 @@ It is great time to put these small bricks together in an expressive yet simple 
     <updated>2024-03-18T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/controllers/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
-We have previously described &lt;a href=&quot;./posts/component-as-infinite-loop&quot;&gt;a way of modelling custom elements as coroutines&lt;/a&gt; (generator functions). 
-We then made sure that they could &lt;a href=&quot;./posts/reactive-attributes&quot; rel=&quot;prev&quot;&gt;be updated efficiently&lt;/a&gt;. 
+We have previously described &lt;a href=&quot;/posts/component-as-infinite-loop&quot;&gt;a way of modelling custom elements as coroutines&lt;/a&gt; (generator functions). 
+We then made sure that they could &lt;a href=&quot;/posts/reactive-attributes&quot; rel=&quot;prev&quot;&gt;be updated efficiently&lt;/a&gt;. 
 In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call &lt;em&gt;controllers&lt;/em&gt;.
     &lt;/p&gt;</content>
   </entry><entry>
@@ -53,7 +53,7 @@ In this post, we will look at different patterns for controlling how (and when) 
     <updated>2024-03-11T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/reactive-attributes/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
-In the &lt;a href=&quot;./posts/component-as-infinite-loop&quot; rel=&quot;prev&quot;&gt;previous article&lt;/a&gt;, we finished by providing a function to convert a generator into a custom element.
+In the &lt;a href=&quot;/posts/component-as-infinite-loop&quot; rel=&quot;prev&quot;&gt;previous article&lt;/a&gt;, we finished by providing a function to convert a generator into a custom element.
 In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide&quot;&gt;queueMicrotask&lt;/a&gt;.
 &lt;/p&gt;</content>
   </entry><entry>
@@ -62,7 +62,7 @@ In this post we will iterate by adding reactive attributes to our component defi
     <updated>2024-03-04T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/component-as-infinite-loop/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
-In the &lt;a rel=&quot;prev&quot; href=&quot;./posts/coroutine&quot;&gt;previous article&lt;/a&gt; we learned what coroutines are and saw some patterns they can help implement.
+In the &lt;a rel=&quot;prev&quot; href=&quot;/posts/coroutine&quot;&gt;previous article&lt;/a&gt; we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
 &lt;/p&gt;</content>
   </entry><entry>

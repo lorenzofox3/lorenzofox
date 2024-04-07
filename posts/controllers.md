@@ -6,8 +6,8 @@ description: Exploration on how to build controllers on top of coroutine web com
 
 <div class="intro">
     <p class="wide">
-We have previously described <a href="./posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
-We then made sure that they could <a href="./posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
+We have previously described <a href="/posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
+We then made sure that they could <a href="/posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
 In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call <em>controllers</em>.
     </p>
 </div>
@@ -72,7 +72,7 @@ The higher order function takes the list of properties to observe as input and c
 The next part is interesting: we override the host's rendering function. The reason for this is that our components can be composed with several controllers, each implementing its own update logic. If another triggers an update, we still want the properties to be injected into the rendering loop, under the ``properties`` namespace here.
 
 Finally, we build the reactivity on the meta object using [property descriptors](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty). This allows us to implement our own setters: whenever the property is set, we request an update.
-Note that we don't have to bother with batching the updates, as it is <a href="./posts/reactive-attributes" rel="prev">already done in the core function</a>.
+Note that we don't have to bother with batching the updates, as it is <a href="/posts/reactive-attributes" rel="prev">already done in the core function</a>.
 
 We can then delegate to the input generator using ``yield*``. 
 
@@ -203,7 +203,7 @@ And that's it!
 ## Subscription based controller
 
 In some architectural patterns, you have singleton instances in charge of maintaining their entities. They usually expose commands (functions)
-and notify anyone interested through events. This is the case of the [redux store we built in the very first article of the series](./posts/coroutine).
+and notify anyone interested through events. This is the case of the [redux store we built in the very first article of the series](/posts/coroutine).
 
 ```js
 import {store} from './path/to/store.js';

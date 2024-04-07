@@ -6,7 +6,7 @@ description: Custom elements (web components) modelling with coroutines
 
 <div class="intro"> 
 <p class="wide">
-In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
+In the <a rel="prev" href="/posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
 </p>
 </div>
@@ -333,7 +333,7 @@ will trigger an error ``Uncaught TypeError: already executing generator``.
 
 We have seen throughout this article that the functional nature of a generator combined with its intrinsic properties can be useful to build a very flexible and simple abstraction of UI component, with the ability to split behaviour and view into reusable bits, to maintain internal state or to have at reach all component lifecycles in the same place.
 
-In <a href="./posts/reactive-attributes" rel="next">the next article</a>, we will see how we can further improve and optimise our generator-to-class conversion.   
+In <a href="/posts/reactive-attributes" rel="next">the next article</a>, we will see how we can further improve and optimise our generator-to-class conversion.   
 
 
 

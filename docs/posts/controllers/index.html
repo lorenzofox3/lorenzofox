@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
-    <base href="https://lorenzofox.dev/"/>
-    
     <meta name="description" content="Exploration on how to build controllers on top of coroutine web components">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
     <title>lorenzofox blog | Controllers on top of coroutine components</title>
-    <link rel="icon" href="./public/favicon.ico"/>
-    <link href="./public/prism-okaidia.css" rel="stylesheet">
-    <link rel="stylesheet" href="./public/theme.css">
-    <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="Blog"/>
+    <link rel="icon" href="/public/favicon.ico"/>
+    <link href="/public/prism-okaidia.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/theme.css">
+    <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="Blog"/>
     <style>
         #logo {
             aspect-ratio: 1 / 1;
@@ -57,11 +54,11 @@
     <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a rel="author" href="./about">About</a></li>
+            <li><a rel="author" href="/about">About</a></li>
         </ul>
     </nav>
     <div class="heading wide">
-        <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
+        <a aria-label="home" href="/"><img id="logo" src="/public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Controllers on top of coroutine components</h1>
             
@@ -76,18 +73,18 @@
 <main id="main">
     <div class="intro">
     <p class="wide">
-We have previously described <a href="./posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
-We then made sure that they could <a href="./posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
+We have previously described <a href="/posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
+We then made sure that they could <a href="/posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
 In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call <em>controllers</em>.
     </p>
 </div>
-<h2>Definition</h2>
+<h2 id="definition" tabindex="-1"><a class="header-anchor" href="#definition">Definition</a></h2>
 <p>Most of the controllers will be higher order functions that take some configuration parameters as input and return a new function that takes a generator and returns a generator.
 Sometimes, if there is no need for configuration, the controller will simply be a function that takes a generator and returns a generator.</p>
 <pre class="language-ts"><code class="language-ts"><span class="token keyword">type</span> <span class="token class-name">Controller</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Generator<span class="token punctuation">)</span> <span class="token operator">=></span> Generator <span class="token operator">|</span> <span class="token operator">&lt;</span>Options<span class="token operator">></span><span class="token punctuation">(</span>options<span class="token operator">:</span> Options<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span>Generator<span class="token punctuation">)</span> <span class="token operator">=></span> Generator<span class="token punctuation">;</span></code></pre>
-<h2>Reactive properties</h2>
+<h2 id="reactive-properties" tabindex="-1"><a class="header-anchor" href="#reactive-properties">Reactive properties</a></h2>
 <p>We have already implemented reactive attributes in the core function. This can sometimes feel limiting, and every framework provides a way to pass rich data through a component tree; while triggering the updates whenever that data changes.</p>
-<p>Let's see what a reactive properties controller might look like:</p>
+<p>Let’s see what a reactive properties controller might look like:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">withReactiveProps</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">props</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span>
   <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> $host<span class="token punctuation">,</span> <span class="token operator">...</span>rest <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">const</span> properties <span class="token operator">=</span> rest<span class="token punctuation">.</span>properties <span class="token operator">||</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -126,12 +123,12 @@ Sometimes, if there is no need for configuration, the controller will simply be 
     <span class="token keyword">yield</span><span class="token operator">*</span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span> $host<span class="token punctuation">,</span> <span class="token operator">...</span>rest <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
 <p>The higher order function takes the list of properties to observe as input and creates a meta object <code>properties</code> to hold the values. This meta object can also be injected if you need to share it between multiple controllers.</p>
-<p>The next part is interesting: we override the host's rendering function. The reason for this is that our components can be composed with several controllers, each implementing its own update logic. If another triggers an update, we still want the properties to be injected into the rendering loop, under the <code>properties</code> namespace here.</p>
+<p>The next part is interesting: we override the host’s rendering function. The reason for this is that our components can be composed with several controllers, each implementing its own update logic. If another triggers an update, we still want the properties to be injected into the rendering loop, under the <code>properties</code> namespace here.</p>
 <p>Finally, we build the reactivity on the meta object using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty">property descriptors</a>. This allows us to implement our own setters: whenever the property is set, we request an update.
-Note that we don't have to bother with batching the updates, as it is <a href="./posts/reactive-attributes" rel="prev">already done in the core function</a>.</p>
+Note that we don’t have to bother with batching the updates, as it is <a href="/posts/reactive-attributes" rel="prev">already done in the core function</a>.</p>
 <p>We can then delegate to the input generator using <code>yield*</code>.</p>
 <p>Note that the reactive properties is a list of property names. You could go a bit further and also support some sort of configuration object where you specify how to parse the data, whether it should reflect on a given attribute, etc.</p>
-<h3>Usage</h3>
+<h3 id="usage" tabindex="-1"><a class="header-anchor" href="#usage">Usage</a></h3>
 <p>We can now compose our component with this controller, and it will react to the property assignment. However, this requires programmatic access (which is usually done by a declarative view engine like <a href="https://www.npmjs.com/package/lit-html">lit-html</a>, etc.).</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> observeName <span class="token operator">=</span> <span class="token function">withReactiveProps</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -145,11 +142,11 @@ Note that we don't have to bother with batching the updates, as it is <a href=".
 <span class="token comment">// ...</span>
 
 helloWorldEl<span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'Lorenzofox'</span><span class="token punctuation">;</span> <span class="token comment">//asignement </span></code></pre>
-<h2>Data model controllers</h2>
+<h2 id="data-model-controllers" tabindex="-1"><a class="header-anchor" href="#data-model-controllers">Data model controllers</a></h2>
 <p>Back in the days of <a href="https://angularjs.org/">Angularjs</a>, you could attach a <em>controller</em> to parts of a DOM tree. The controller was
 responsible for the data model (a variable named <code>$scope</code>) and some behaviour (functions) to mutate the data model.
 The data model was exposed to the view template, and any change to the data model would be reflected in the DOM.
-This was nice, because it was easy to test the controller, since it didn't reference the DOM in any way: the logic and the view were correctly separated.</p>
+This was nice, because it was easy to test the controller, since it didn’t reference the DOM in any way: the logic and the view were correctly separated.</p>
 <p>Our version is slightly different:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">createCountController</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$scope<span class="token punctuation">,</span> $host<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
     <span class="token keyword">const</span> step <span class="token operator">=</span> $host<span class="token punctuation">.</span><span class="token function">hasAttribute</span><span class="token punctuation">(</span><span class="token string">'step'</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token function">Number</span><span class="token punctuation">(</span>$host<span class="token punctuation">.</span><span class="token function">getAttribute</span><span class="token punctuation">(</span><span class="token string">'step'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">;</span>
@@ -184,8 +181,8 @@ template<span class="token punctuation">.</span>innerHTML <span class="token ope
         countEl<span class="token punctuation">.</span>textContent <span class="token operator">=</span> $scope<span class="token punctuation">.</span>count<span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
-<h3>Implementation</h3>
-<p>Let's see how to implement this type of controller and how to bind it to a custom element:</p>
+<h3 id="implementation" tabindex="-1"><a class="header-anchor" href="#implementation">Implementation</a></h3>
+<p>Let’s see how to implement this type of controller and how to bind it to a custom element:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">withController</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">controllerFn</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span>
   <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span>deps<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">const</span> $scope <span class="token operator">=</span> deps<span class="token punctuation">.</span>$scope <span class="token operator">||</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -228,14 +225,14 @@ template<span class="token punctuation">.</span>innerHTML <span class="token ope
 <p>This is very similar to the reactive properties controller.</p>
 <ol>
 <li>The controller uses the passed meta object <code>$scope</code> , or it creates it.</li>
-<li>The actual controller (what will be injected into the generator) is instantiated. A function to clone the current scope is added. Here we don't know the shape of <code>$scope</code> in advance, so we can't use property descriptors and have to use a proxy instead (with the same logic behind it).</li>
-<li>It overrides the host's rendering function for the same reasons as above.</li>
+<li>The actual controller (what will be injected into the generator) is instantiated. A function to clone the current scope is added. Here we don’t know the shape of <code>$scope</code> in advance, so we can’t use property descriptors and have to use a proxy instead (with the same logic behind it).</li>
+<li>It overrides the host’s rendering function for the same reasons as above.</li>
 <li>When the created routine delegates to the underlying generator, it passes the controller.</li>
 </ol>
-<p>And that's it!</p>
-<h2>Subscription based controller</h2>
+<p>And that’s it!</p>
+<h2 id="subscription-based-controller" tabindex="-1"><a class="header-anchor" href="#subscription-based-controller">Subscription based controller</a></h2>
 <p>In some architectural patterns, you have singleton instances in charge of maintaining their entities. They usually expose commands (functions)
-and notify anyone interested through events. This is the case of the <a href="./posts/coroutine">redux store we built in the very first article of the series</a>.</p>
+and notify anyone interested through events. This is the case of the <a href="/posts/coroutine">redux store we built in the very first article of the series</a>.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>store<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./path/to/store.js'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">withReduxStore</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">gen</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">function</span><span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -258,11 +255,11 @@ and notify anyone interested through events. This is the case of the <a href="./
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span> </code></pre>
 <p>Same logic as before. We just had to unsubscribe from the store in the <code>finally</code> clause, when the component is unmounted.</p>
-<h2>Conclusion</h2>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>All the controllers are simple and short functions that we can easily bind to a generator. Combining them is as easy as applying function composition and the sky is the limit!
 This gives us a wide variety of solutions when it comes to building the architecture of our next applications.
 But with this diversity comes the risk of inconsistency, especially in large teams whose members may have different levels of experience.
-In the next article, we'll make choices and let patterns emerge: we'll build our own UI framework (rebuilding the Vuejs Option API)...</p>
+In the next article, we’ll make choices and let patterns emerge: we’ll build our own UI framework (rebuilding the Vuejs Option API)…</p>
 
 </main>
 <footer class="wide" id="main-footer">
@@ -291,7 +288,7 @@ In the next article, we'll make choices and let patterns emerge: we'll build our
                         <use xlink:href="#devto"/>
                     </svg>
                     Dev.to</a></li>
-            <li><a href="./feed.xml">
+            <li><a href="/feed.xml">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#rss"/>
                 </svg>

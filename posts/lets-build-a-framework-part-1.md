@@ -6,7 +6,7 @@ description: We will use the various parts around the coroutines we have talked 
 
 <div class="intro">
     <p class="wide">
-We have now at our disposal a way to <a href="./posts/component-as-infinite-loop/">turn coroutines into web components</a>. We also have a set of higher order functions to <a href="./posts/component-as-infinite-loop">manage how a component updates</a>.
+We have now at our disposal a way to <a href="/posts/component-as-infinite-loop/">turn coroutines into web components</a>. We also have a set of higher order functions to <a href="/posts/component-as-infinite-loop">manage how a component updates</a>.
 It is great time to put these small bricks together in an expressive yet simple new UI Framework.
     </p>
 </div>
@@ -185,7 +185,7 @@ the view model.
 
 How could we build this component within the coroutine model ?
 
-We can first have a controller as defined in [the previous article](./posts/controllers):
+We can first have a controller as defined in [the previous article](/posts/controllers):
 
 ```js
 export const createStepController = ({$scope, $host}) => {
@@ -464,7 +464,7 @@ these properties are simple getters(readonly), functions of the view model.
 We use yet another higher order function ``withInjectables`` to ensure that the view model is injected into the other controllers under the correct name parameter. 
 
 We need to adjust the parameter passed to the controller function of ``withController`` because it has injected a variable named ``$scope``, whereas we have normalised the controller function signature to ``viewModel``.  
-We could have directly used the ``viewModel`` variable from the closure but [``withController`` passes a Proxy](./posts/controllers) to add reactivity: hence the remapping of this parameter.
+We could have directly used the ``viewModel`` variable from the closure but [``withController`` passes a Proxy](/posts/controllers) to add reactivity: hence the remapping of this parameter.
 
 Finally, we can use our newly created ``withView`` function, passing a ``getViewModel`` function which always returns the reference of the view model.
 
@@ -475,7 +475,7 @@ Great!
 Thanks to a small set of specialised functions, we were able to create a completely different API based on the component representation our organisation is familiar with.   
 The process was actually very simple, and again shows the full power of functions and composition. Generators have disappeared and are now an implementation detail, but they have proved their versatility in building higher level APIs. 
 
-We can actually <a href="./posts/lets-build-a-framework-part-2" rel="next">do way better</a>.
+We can actually <a href="/posts/lets-build-a-framework-part-2" rel="next">do way better</a>.
 
 
 

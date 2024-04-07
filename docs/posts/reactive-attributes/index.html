@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
-    <base href="https://lorenzofox.dev/"/>
-    
     <meta name="description" content="Improvement on the coroutine to web component conversion function, adding reactive attributes">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
     <title>lorenzofox blog | Batch component updates with micro tasks</title>
-    <link rel="icon" href="./public/favicon.ico"/>
-    <link href="./public/prism-okaidia.css" rel="stylesheet">
-    <link rel="stylesheet" href="./public/theme.css">
-    <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="Blog"/>
+    <link rel="icon" href="/public/favicon.ico"/>
+    <link href="/public/prism-okaidia.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/theme.css">
+    <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="Blog"/>
     <style>
         #logo {
             aspect-ratio: 1 / 1;
@@ -57,11 +54,11 @@
     <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a rel="author" href="./about">About</a></li>
+            <li><a rel="author" href="/about">About</a></li>
         </ul>
     </nav>
     <div class="heading wide">
-        <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
+        <a aria-label="home" href="/"><img id="logo" src="/public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Batch component updates with micro tasks</h1>
             
@@ -76,16 +73,16 @@
 <main id="main">
     <div class="intro">
 <p class="wide">
-In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
+In the <a href="/posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
 In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.
 </p>
 </div>
-<h2>On component interfaces</h2>
+<h2 id="on-component-interfaces" tabindex="-1"><a class="header-anchor" href="#on-component-interfaces">On component interfaces</a></h2>
 <p>Custom elements let you declare observable attributes (thus limited to string values) and react to any change. This seems limiting compared to the rich data properties you have with frameworks like Vuejs, React and so on.
 However, You have to keep in mind that, with these frameworks, the component models live in memory within yet another abstraction on top of the Document Object Model that the browser deals with. Custom elements, on the other hand, can be serialised (i.e. expressed as a plain HTML string) just like any regular built-in element.
-This implies, for example, that you don't need any specific tooling/runtime to add these components as part of an HTML fragment on the server side.</p>
+This implies, for example, that you don’t need any specific tooling/runtime to add these components as part of an HTML fragment on the server side.</p>
 <p>Anyway, we will see later how to define rich reactive properties. But again, these properties would require a programmatic access to the related DOM node.</p>
-<h2>Basic implementation</h2>
+<h2 id="basic-implementation" tabindex="-1"><a class="header-anchor" href="#basic-implementation">Basic implementation</a></h2>
 <p>Have a look at the following code:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">componentify</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">gen<span class="token punctuation">,</span> <span class="token punctuation">{</span>observedAttributes <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">class</span> <span class="token class-name">extends</span> HTMLElement <span class="token punctuation">{</span>
     #loop<span class="token punctuation">;</span>
@@ -163,7 +160,7 @@ template<span class="token punctuation">.</span>innerHTML <span class="token ope
 
 <span class="token comment">// &lt;basic-sum a="42" b="58">&lt;/basic-sum></span></code></pre>
 <p>And if you change either attribute <code>a</code> or attribute <code>b</code>, the calculation result will be updated!</p>
-<h2>Many updates at the same time</h2>
+<h2 id="many-updates-at-the-same-time" tabindex="-1"><a class="header-anchor" href="#many-updates-at-the-same-time">Many updates at the same time</a></h2>
 <p>What happens if you update both attributes in the same call stack ? (You can first add a <code>console.log</code> statement inside the <code>render</code> function)</p>
 <pre class="language-js"><code class="language-js">document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'basic-sum'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>currentTarget<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
     currentTarget<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'a'</span><span class="token punctuation">,</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -194,7 +191,7 @@ But, as we saw in the previous article, you can split the update logic into a st
 <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
 <p>The initialisation would already trigger three updates. Then, when you have finished loading the books, you render the whole book list twice: once when you effectively assign <code>books</code> but also another time when you change the loading status.
 To solve this issue, you could reach for more fine-grained construction like <a href="https://dev.to/this-is-learning/the-evolution-of-signals-in-javascript-8ob">signals</a> or observables (etc.), but it comes with all the ceremony they require. Would it not be easier to batch all the changes that occur in the same call stack ?</p>
-<h2>Tasks and Micro tasks</h2>
+<h2 id="tasks-and-micro-tasks" tabindex="-1"><a class="header-anchor" href="#tasks-and-micro-tasks">Tasks and Micro tasks</a></h2>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">The MDN documentation</a> will explain better than I can do what <strong>microtasks</strong> are and how they differ from <strong>tasks</strong>. But in a nutshell: a microtask is a piece of code that is executed when there is nothing left to execute within a task and before the control is given back to the Javascript Event Loop. A (synchronous) call stack is executed inside the same task, so deferring the rendering code at the end of the call stack would simply mean executing that code inside a micro task. Here comes <a href="https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask">queueMicrotask</a>:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">componentify</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">gen<span class="token punctuation">,</span> <span class="token punctuation">{</span>observedAttributes <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">class</span> <span class="token class-name">extends</span> HTMLElement <span class="token punctuation">{</span>
     <span class="token comment">// ...</span>
@@ -226,10 +223,10 @@ To solve this issue, you could reach for more fine-grained construction like <a 
     
 <span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
 <p>We add an internal <code>updateStack</code>. Now whenever <code>render</code> (should we rename it for <code>update</code> ? ) is called, we add the requested update to the stack. If there is not yet any pending update, we enqueue the call to the internal loop (the actual rendering) in the micro task queue.
-That's it: the updates occurring within the same context (same call stack) are batched together.</p>
+That’s it: the updates occurring within the same context (same call stack) are batched together.</p>
 <p>Note that some updates may conflict with each other. The resolution algorithm is quite simple: the last call takes precedence (following how <code>Object.assign</code> works).</p>
 <p>For another reason, we also run the component teardown code inside a microtask. Attentive readers will have noticed that when a component is unmounted it becomes <em>dead</em> as we have exited the rendering loop. This is fine, if you are not trying to reuse the corresponding DOM node later. But sometimes, you just want to move the node around in the DOM tree (for example, when rearranging list items). This disconnects and reconnects the node in the same call stack. By using a microtask, you prevent the component from leaving its rendering loop.</p>
-<h2>Caveats and points of attention</h2>
+<h2 id="caveats-and-points-of-attention" tabindex="-1"><a class="header-anchor" href="#caveats-and-points-of-attention">Caveats and points of attention</a></h2>
 <p>You can technically enqueue a microtask from a microtask, never giving control back to the Javascript Event Loop. This could lead to the locking of the main thread if you are careless (calling a render inside the rendering loop).
 It also means that concurrent calls to <code>render</code> will no longer throw an error as they will be batched together. However, the order is still guaranteed.</p>
 <p>Another side effect is that if you want to assess the result of an update, you will have to do it on the next task of the Event Loop. This is not a problem but can cause confusion in test files:</p>
@@ -259,7 +256,7 @@ It also means that concurrent calls to <code>render</code> will no longer throw 
 
     <span class="token function">eq</span><span class="token punctuation">(</span>output<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span> <span class="token string">'60'</span><span class="token punctuation">)</span> <span class="token comment">// will pass;</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<h2>Conclusion</h2>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>We have improved our component definition by adding reactivity through attributes. We used microtasks to optimise and batch the updates that occur in the same context. This is a powerful (and little known) tool, although it has some drawbacks.
 The next step will be to see how we can build a set of controllers: higher order functions that are dedicated to encapsulating the state and update logic.</p>
 
@@ -290,7 +287,7 @@ The next step will be to see how we can build a set of controllers: higher order
                         <use xlink:href="#devto"/>
                     </svg>
                     Dev.to</a></li>
-            <li><a href="./feed.xml">
+            <li><a href="/feed.xml">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#rss"/>
                 </svg>

@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
-    <base href="https://lorenzofox.dev/"/>
-    
     <meta name="description" content="home page of Laurent RENARD's blog">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
     <title>lorenzofox blog | Lorenzofox's dev blog</title>
-    <link rel="icon" href="./public/favicon.ico"/>
-    <link href="./public/prism-okaidia.css" rel="stylesheet">
-    <link rel="stylesheet" href="./public/theme.css">
-    <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="Blog"/>
+    <link rel="icon" href="/public/favicon.ico"/>
+    <link href="/public/prism-okaidia.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/theme.css">
+    <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="Blog"/>
     <style>
         #logo {
             aspect-ratio: 1 / 1;
@@ -57,11 +54,11 @@
     <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a rel="author" href="./about">About</a></li>
+            <li><a rel="author" href="/about">About</a></li>
         </ul>
     </nav>
     <div class="heading wide">
-        <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
+        <a aria-label="home" href="/"><img id="logo" src="/public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Lorenzofox's dev blog</h1>
             
@@ -108,7 +105,7 @@ This opens up a lot of possibilities and new patterns at low cost. However, I ha
     </header>
 
     <p>
-<a href="./posts/lets-build-a-framework-part-1" rel="prev">Our framework</a> seems complete and well thought out. We went through the process of building <em>on top of</em> a solid foundation. 
+<a href="/posts/lets-build-a-framework-part-1" rel="prev">Our framework</a> seems complete and well thought out. We went through the process of building <em>on top of</em> a solid foundation. 
 This is how most software is written these days, but we suffered from the common bias and added unnecessary complexity. Here we will see how removing components can actually be better.
 </p>
     <a rel="bookmark" href="/posts/lets-build-a-framework-part-2/">Read article</a>
@@ -124,7 +121,7 @@ This is how most software is written these days, but we suffered from the common
     </header>
 
     <p>
-We have now at our disposal a way to <a href="./posts/component-as-infinite-loop/">turn coroutines into web components</a>. We also have a set of higher order functions to <a href="./posts/component-as-infinite-loop">manage how a component updates</a>.
+We have now at our disposal a way to <a href="/posts/component-as-infinite-loop/">turn coroutines into web components</a>. We also have a set of higher order functions to <a href="/posts/component-as-infinite-loop">manage how a component updates</a>.
 It is great time to put these small bricks together in an expressive yet simple new UI Framework.
     </p>
     <a rel="bookmark" href="/posts/lets-build-a-framework-part-1/">Read article</a>
@@ -140,8 +137,8 @@ It is great time to put these small bricks together in an expressive yet simple 
     </header>
 
     <p>
-We have previously described <a href="./posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
-We then made sure that they could <a href="./posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
+We have previously described <a href="/posts/component-as-infinite-loop">a way of modelling custom elements as coroutines</a> (generator functions). 
+We then made sure that they could <a href="/posts/reactive-attributes" rel="prev">be updated efficiently</a>. 
 In this post, we will look at different patterns for controlling how (and when) the components are updated: these are what I call <em>controllers</em>.
     </p>
     <a rel="bookmark" href="/posts/controllers/">Read article</a>
@@ -157,7 +154,7 @@ In this post, we will look at different patterns for controlling how (and when) 
     </header>
 
     <p>
-In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
+In the <a href="/posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
 In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.
 </p>
     <a rel="bookmark" href="/posts/reactive-attributes/">Read article</a>
@@ -173,7 +170,7 @@ In this post we will iterate by adding reactive attributes to our component defi
     </header>
 
     <p>
-In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
+In the <a rel="prev" href="/posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
 </p>
     <a rel="bookmark" href="/posts/component-as-infinite-loop/">Read article</a>
@@ -224,7 +221,7 @@ In this article, we will see how coroutines can be used to model web components 
                         <use xlink:href="#devto"/>
                     </svg>
                     Dev.to</a></li>
-            <li><a href="./feed.xml">
+            <li><a href="/feed.xml">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#rss"/>
                 </svg>

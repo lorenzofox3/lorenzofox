@@ -6,7 +6,7 @@ description: Improvement on the coroutine to web component conversion function, 
 
 <div class="intro">
 <p class="wide">
-In the <a href="./posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
+In the <a href="/posts/component-as-infinite-loop" rel="prev">previous article</a>, we finished by providing a function to convert a generator into a custom element.
 In this post we will iterate by adding reactive attributes to our component definition, and ensuring that updates are performed in batch, using the hidden gem <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide">queueMicrotask</a>.
 </p>
 </div>

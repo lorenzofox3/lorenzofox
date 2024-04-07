@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
-    <base href="https://lorenzofox.dev/"/>
-    
     <meta name="description" content="Custom elements (web components) modelling with coroutines">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
     <title>lorenzofox blog | Coroutines and web components</title>
-    <link rel="icon" href="./public/favicon.ico"/>
-    <link href="./public/prism-okaidia.css" rel="stylesheet">
-    <link rel="stylesheet" href="./public/theme.css">
-    <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="Blog"/>
+    <link rel="icon" href="/public/favicon.ico"/>
+    <link href="/public/prism-okaidia.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/theme.css">
+    <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="Blog"/>
     <style>
         #logo {
             aspect-ratio: 1 / 1;
@@ -57,11 +54,11 @@
     <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a rel="author" href="./about">About</a></li>
+            <li><a rel="author" href="/about">About</a></li>
         </ul>
     </nav>
     <div class="heading wide">
-        <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
+        <a aria-label="home" href="/"><img id="logo" src="/public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Coroutines and web components</h1>
             
@@ -76,11 +73,11 @@
 <main id="main">
     <div class="intro"> 
 <p class="wide">
-In the <a rel="prev" href="./posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
+In the <a rel="prev" href="/posts/coroutine">previous article</a> we learned what coroutines are and saw some patterns they can help implement.
 In this article, we will see how coroutines can be used to model web components in a different way, and why you might like it.
 </p>
 </div>
-<h2>Rendering loop</h2>
+<h2 id="rendering-loop" tabindex="-1"><a class="header-anchor" href="#rendering-loop">Rendering loop</a></h2>
 <p>Among other things, coroutines have a few properties that we will use in this short essay:</p>
 <ul>
 <li>They are primarily <strong>functions</strong> and can benefit from the whole functional arsenal of Javascript (composition, higher order function, delegation, etc.).</li>
@@ -88,7 +85,7 @@ In this article, we will see how coroutines can be used to model web components 
 <li>You can inject pretty much any kind of data when they are paused. For example, an infinite loop within the body of the routine can be considered as a public API function.</li>
 <li>You cannot, by design, call the <code>next</code> function concurrently.</li>
 </ul>
-<h2>Introduction example</h2>
+<h2 id="introduction-example" tabindex="-1"><a class="header-anchor" href="#introduction-example">Introduction example</a></h2>
 <p>Consider the following generator:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span><span class="token operator">*</span> <span class="token function">someComponent</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$host<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -117,7 +114,7 @@ In this article, we will see how coroutines can be used to model web components 
 
 <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Laurent'</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Bernadette'</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<h2>The power of functions</h2>
+<h2 id="the-power-of-functions" tabindex="-1"><a class="header-anchor" href="#the-power-of-functions">The power of functions</a></h2>
 <p>For now, the rendering loop is a piece of imperative code, but it can use any rendering library you want (react and so on).
 The first point above says that functions (and therefore coroutines) are very versatile in Javascript. We could easily go back to a known paradigm if we wanted to. For example, we use <a href="./todo">lit-html</a> to have a declarative view instead of a bunch of imperative code:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>render<span class="token punctuation">,</span> html<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'lit-element'</span><span class="token punctuation">;</span>
@@ -145,7 +142,7 @@ The first point above says that functions (and therefore coroutines) are very ve
 <span class="token keyword">const</span> HelloWorldComponent <span class="token operator">=</span> <span class="token function">createComponent</span><span class="token punctuation">(</span><span class="token function">withView</span><span class="token punctuation">(</span>template<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 <p>All right, we are on familiar ground: our component is now a simple function of the state</p>
 <pre class="language-js"><code class="language-js"><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>name<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;p>hello </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>name<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/p></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span> </code></pre>
-<h2>Maintaining a state</h2>
+<h2 id="maintaining-a-state" tabindex="-1"><a class="header-anchor" href="#maintaining-a-state">Maintaining a state</a></h2>
 <p>Having an infinite rendering loop to model our component can actually be more interesting than it seems at first: you can have a state in the closure of that loop.</p>
 <p>If we first modify the higher-level <code>createComponent</code> function a little to bind the <code>render</code> function to the host element:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">createComponent</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">generator</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$host<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
@@ -169,7 +166,7 @@ The first point above says that functions (and therefore coroutines) are very ve
    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 <p>In frameworks like React, where you only have access to the equivalent of what is inside the loop, you rely on the framework extension points (the hooks in the case of React) to build this sort of mechanism, and have very little control over rendering scheduling.</p>
-<h2>More HOF function to reduce the coupling.</h2>
+<h2 id="more-hof-function-to-reduce-the-coupling." tabindex="-1"><a class="header-anchor" href="#more-hof-function-to-reduce-the-coupling.">More HOF function to reduce the coupling.</a></h2>
 <p>The component embeds its view and some logic at the same time. Again, we can easily decouple them so that we can reuse either the view or the logic:
 All we need to do is take advantage of the third property of coroutines mentioned in the introduction, and a simple delegation mechanism inherent to generators: <code>yield*</code>.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">countClickable</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">view</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">function</span> <span class="token operator">*</span><span class="token punctuation">(</span><span class="token punctuation">{</span>$host<span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -189,11 +186,11 @@ All we need to do is take advantage of the third property of coroutines mentione
         $host<span class="token punctuation">.</span>textContent <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">I have been clicked </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>count<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> time(s)</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<p>Neat ! You can now use the &quot;clickable&quot; behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data interface (<code>{ count: number | string}</code>): note how the data comes from the <code>yield</code> assignation.</p>
+<p>Neat ! You can now use the “clickable” behaviour independently, on different views. In the same way, you can plug the view into a different controller logic, as long as it passes the expected data interface (<code>{ count: number | string}</code>): note how the data comes from the <code>yield</code> assignation.</p>
 <p>We will see more patterns like this in future articles.</p>
-<h2>Web components and lifecycle mapping</h2>
+<h2 id="web-components-and-lifecycle-mapping" tabindex="-1"><a class="header-anchor" href="#web-components-and-lifecycle-mapping">Web components and lifecycle mapping</a></h2>
 <p>So far we have designed our component to be a function of the host. We can go further and ensure that the rendering routine is actually private to the host, so that the rendering code is encapsulated inside along with any potential behaviour enhancements (the <code>countClickable</code> mixin for example), while both remain reusable.</p>
-<p>Let's look at another way of modelling <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements">custom elements</a>. To enhance your HTML document, you can teach the browser new ones using its registry and the <code>define</code> method.</p>
+<p>Let’s look at another way of modelling <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements">custom elements</a>. To enhance your HTML document, you can teach the browser new ones using its registry and the <code>define</code> method.</p>
 <pre class="language-js"><code class="language-js">customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">'hello-world'</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">extends</span> HTMLElement <span class="token punctuation">{</span>
     <span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>textContent <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">hello </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getAttribute</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>
@@ -253,7 +250,7 @@ All we need to do is take advantage of the third property of coroutines mentione
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
 <p>Yet, one important lifecycle remains to be implemented. When the component is unmounted, the <code>disconnectedCallbak</code> of the class definition is normally called, allowing us to run cleanup code and avoid memory leaks for example.</p>
-<p>In the generator we can force the exit of the loop into a <code>finally</code> clause. This is as simple as calling the loop's <code>return</code> function instead of the usual <code>next</code>.</p>
+<p>In the generator we can force the exit of the loop into a <code>finally</code> clause. This is as simple as calling the loop’s <code>return</code> function instead of the usual <code>next</code>.</p>
 <p>Altogether:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">define</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">tag<span class="token punctuation">,</span> gen</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
     customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span>tag<span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">extends</span> HTMLElement <span class="token punctuation">{</span>
@@ -304,8 +301,8 @@ All we need to do is take advantage of the third property of coroutines mentione
         console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'cleanup here !!!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<p>This &quot;linear&quot; representation of the component and its lifetime makes things easier to reason about: there are no surprises when a callback or a hook is called, everything is read from top to bottom!</p>
-<h2>Concurrent updates</h2>
+<p>This “linear” representation of the component and its lifetime makes things easier to reason about: there are no surprises when a callback or a hook is called, everything is read from top to bottom!</p>
+<h2 id="concurrent-updates" tabindex="-1"><a class="header-anchor" href="#concurrent-updates">Concurrent updates</a></h2>
 <p>Before we conclude, we can illustrate the fourth point mentioned in the introduction: if you try to advance a generator function while it is already advancing, you will get an error. In the component world, this means that concurrent rendering is impossible by design!</p>
 <p>This code:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span><span class="token operator">*</span> <span class="token function">comp</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$host<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -319,9 +316,9 @@ All we need to do is take advantage of the third property of coroutines mentione
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
 <p>will trigger an error <code>Uncaught TypeError: already executing generator</code>.</p>
-<h2>conclusion</h2>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">conclusion</a></h2>
 <p>We have seen throughout this article that the functional nature of a generator combined with its intrinsic properties can be useful to build a very flexible and simple abstraction of UI component, with the ability to split behaviour and view into reusable bits, to maintain internal state or to have at reach all component lifecycles in the same place.</p>
-<p>In <a href="./posts/reactive-attributes" rel="next">the next article</a>, we will see how we can further improve and optimise our generator-to-class conversion.</p>
+<p>In <a href="/posts/reactive-attributes" rel="next">the next article</a>, we will see how we can further improve and optimise our generator-to-class conversion.</p>
 
 </main>
 <footer class="wide" id="main-footer">
@@ -350,7 +347,7 @@ All we need to do is take advantage of the third property of coroutines mentione
                         <use xlink:href="#devto"/>
                     </svg>
                     Dev.to</a></li>
-            <li><a href="./feed.xml">
+            <li><a href="/feed.xml">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#rss"/>
                 </svg>

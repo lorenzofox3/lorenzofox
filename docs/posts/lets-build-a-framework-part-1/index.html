@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
-    <base href="https://lorenzofox.dev/"/>
-    
     <meta name="description" content="We will use the various parts around the coroutines we have talked about so far, and we will build a new UI framework from it.">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="Eleventy v2.0.1">
     <title>lorenzofox blog | Let's build a UI framework - part 1/2</title>
-    <link rel="icon" href="./public/favicon.ico"/>
-    <link href="./public/prism-okaidia.css" rel="stylesheet">
-    <link rel="stylesheet" href="./public/theme.css">
-    <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="Blog"/>
+    <link rel="icon" href="/public/favicon.ico"/>
+    <link href="/public/prism-okaidia.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/theme.css">
+    <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="Blog"/>
     <style>
         #logo {
             aspect-ratio: 1 / 1;
@@ -57,11 +54,11 @@
     <nav aria-label="main navigation" class="wide">
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a rel="author" href="./about">About</a></li>
+            <li><a rel="author" href="/about">About</a></li>
         </ul>
     </nav>
     <div class="heading wide">
-        <a aria-label="home" href="./"><img id="logo" src="./public/logo.webp" alt="lorenzofox's blog logo"/></a>
+        <a aria-label="home" href="/"><img id="logo" src="/public/logo.webp" alt="lorenzofox's blog logo"/></a>
         <div class="title">
             <h1>Let's build a UI framework - part 1/2</h1>
             
@@ -76,11 +73,11 @@
 <main id="main">
     <div class="intro">
     <p class="wide">
-We have now at our disposal a way to <a href="./posts/component-as-infinite-loop/">turn coroutines into web components</a>. We also have a set of higher order functions to <a href="./posts/component-as-infinite-loop">manage how a component updates</a>.
+We have now at our disposal a way to <a href="/posts/component-as-infinite-loop/">turn coroutines into web components</a>. We also have a set of higher order functions to <a href="/posts/component-as-infinite-loop">manage how a component updates</a>.
 It is great time to put these small bricks together in an expressive yet simple new UI Framework.
     </p>
 </div>
-<h2>Introduction</h2>
+<h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
 <p>The usefulness (and attractiveness) of a framework is definitely more than its codebase: documentation, tools, online
 content, popularity in the job market and so on.
 But when I think about its codebase and its API, I see the expression of the human organisation that uses it.</p>
@@ -112,11 +109,11 @@ code:</p>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 <p>Yet, the former seems to have no limits (other than the rules of function composition) and can be daunting to use, while
 the latter offers a more limited set of options, which tends to look easier to manage.</p>
-<h2>Framework under construction</h2>
+<h2 id="framework-under-construction" tabindex="-1"><a class="header-anchor" href="#framework-under-construction">Framework under construction</a></h2>
 <p>Our organisation finds the second API easier to organise the codebase.
-Let's now go through the process of building the API we want, by tailoring the various small and specialised functions
+Let’s now go through the process of building the API we want, by tailoring the various small and specialised functions
 that we have built in the previous articles.</p>
-<h3>target</h3>
+<h3 id="target" tabindex="-1"><a class="header-anchor" href="#target">target</a></h3>
 <p>In my previous company, the application we were building had a page that consisted of a list of steps. The user had to
 go through this list and fill some information to complete each step. We used <a href="https://vuejs.org/">Vuejs</a> to build our
 user interfaces, and a step component looked like this:</p>
@@ -217,9 +214,9 @@ which case the user must fill out and submit the form.</p>
 under <code>this</code>), while <code>computed</code> are read-only properties derived from <code>data</code> (or <code>props</code>).
 <code>methods</code> contains the logic and is what I call the <code>controller</code>. <code>props</code>, <code>data</code> and <code>computed</code> are what I call
 the view model.</p>
-<h3>mental model conversion</h3>
+<h3 id="mental-model-conversion" tabindex="-1"><a class="header-anchor" href="#mental-model-conversion">mental model conversion</a></h3>
 <p>How could we build this component within the coroutine model ?</p>
-<p>We can first have a controller as defined in <a href="./posts/controllers">the previous article</a>:</p>
+<p>We can first have a controller as defined in <a href="/posts/controllers">the previous article</a>:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">createStepController</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$scope<span class="token punctuation">,</span> $host<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
     $scope<span class="token punctuation">.</span>status <span class="token operator">=</span> <span class="token string">'todo'</span><span class="token punctuation">;</span>
     $scope<span class="token punctuation">.</span>isDone <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
@@ -263,7 +260,7 @@ However, you should have noticed that we have to delay the calls to the getter o
 because, if you remember,
 the controller is instantiated when the component is being constructed, while the property is set after it is mounted.
 We will assume that it is not a problem for now.</p>
-<p>Now let's build the component itself with a generator function:</p>
+<p>Now let’s build the component itself with a generator function:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>render<span class="token punctuation">,</span> html<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'lit-html'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token operator">*</span><span class="token function">Step</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>$host<span class="token punctuation">,</span> controller<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -323,7 +320,7 @@ All the injected namespaces are merged into a single <code>viewModel</code> and 
 
 <span class="token function">render</span><span class="token punctuation">(</span>html<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
     &lt;app-step debug .step=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>step<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">>&lt;/app-step></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'app'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<h3>Abstract away the implementation details</h3>
+<h3 id="abstract-away-the-implementation-details" tabindex="-1"><a class="header-anchor" href="#abstract-away-the-implementation-details">Abstract away the implementation details</a></h3>
 <p>The next step is to abstract away the coroutine-based mental model and expose a single function that defines the components using the targeted API:</p>
 <pre class="language-js"><code class="language-js"><span class="token function">defineComponent</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
     <span class="token literal-property property">tag</span><span class="token operator">:</span> <span class="token string">'my-comp'</span><span class="token punctuation">,</span>
@@ -458,13 +455,13 @@ For the computed (<code>isDone</code>), we assume it is handled somewhere else, 
 these properties are simple getters(readonly), functions of the view model.</p>
 <p>We use yet another higher order function <code>withInjectables</code> to ensure that the view model is injected into the other controllers under the correct name parameter.</p>
 <p>We need to adjust the parameter passed to the controller function of <code>withController</code> because it has injected a variable named <code>$scope</code>, whereas we have normalised the controller function signature to <code>viewModel</code>.<br>
-We could have directly used the <code>viewModel</code> variable from the closure but <a href="./posts/controllers"><code>withController</code> passes a Proxy</a> to add reactivity: hence the remapping of this parameter.</p>
+We could have directly used the <code>viewModel</code> variable from the closure but <a href="/posts/controllers"><code>withController</code> passes a Proxy</a> to add reactivity: hence the remapping of this parameter.</p>
 <p>Finally, we can use our newly created <code>withView</code> function, passing a <code>getViewModel</code> function which always returns the reference of the view model.</p>
 <p>Great!</p>
-<h2>Conclusion</h2>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>Thanks to a small set of specialised functions, we were able to create a completely different API based on the component representation our organisation is familiar with.<br>
 The process was actually very simple, and again shows the full power of functions and composition. Generators have disappeared and are now an implementation detail, but they have proved their versatility in building higher level APIs.</p>
-<p>We can actually <a href="./posts/lets-build-a-framework-part-2" rel="next">do way better</a>.</p>
+<p>We can actually <a href="/posts/lets-build-a-framework-part-2" rel="next">do way better</a>.</p>
 
 </main>
 <footer class="wide" id="main-footer">
@@ -493,7 +490,7 @@ The process was actually very simple, and again shows the full power of function
                         <use xlink:href="#devto"/>
                     </svg>
                     Dev.to</a></li>
-            <li><a href="./feed.xml">
+            <li><a href="/feed.xml">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#rss"/>
                 </svg>

@@ -191,6 +191,6 @@ This is very similar to the ``async`` function, except that you replace the buil
 ## <span>Going further</span>
 
 It is important to note that a generator has more than just the ``next`` function. ``return`` and ``throw`` can indeed help to create different flows.
-In <a href="./posts/component-as-infinite-loop" rel="next">a future article</a>, we will see how we can use a coroutine to model a UI component as an event loop, where each iteration represents a content rendering. 
+In <a href="/posts/component-as-infinite-loop" rel="next">a future article</a>, we will see how we can use a coroutine to model a UI component as an event loop, where each iteration represents a content rendering. 
 
 
