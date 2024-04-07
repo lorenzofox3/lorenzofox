@@ -49,6 +49,7 @@ canvas {
     --gray: #1e1e1e;
     --mix: #142334;
     --accent: #1c5aab;
+    --orange: #f27e2c;
     --shadow-color: #777777;
 
     --secondary-color: #31363b;
@@ -101,6 +102,7 @@ td, th {
         --secondary-color: #353c42;
         --secondary-font-color: #eeeeee;
         --shadow-color: #151515;
+        --orange: #8c410d;
 
     }
 }
@@ -173,6 +175,27 @@ main {
             font-size: 1.1em;
             line-height: 1.6;
         }
+    }
+}
+
+.header-anchor {
+    --anchor-color: transparent;
+    text-decoration: none;
+    color: inherit;
+    background-image: linear-gradient(to bottom, var(--orange), var(--orange) 4px);
+    background-repeat: no-repeat;
+    background-size: calc(100% - 0.8em) 33%;
+    background-position-y: 100%;
+    border-radius: unset;
+
+    &:hover {
+        --anchor-color: var(--orange);
+    }
+
+    &::after {
+        content: '#';
+        margin-inline-start: 0.25em;
+        color: var(--anchor-color);
     }
 }
 
