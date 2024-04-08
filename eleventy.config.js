@@ -23,9 +23,7 @@ module.exports = function (conf) {
         const introP =  (content.split('</p>')[0]).split('<p class="wide">')[1];
         return `<p>${introP}</p>`
     });
-    conf.addPassthroughCopy({
-        "./node_modules/prismjs/themes/prism-okaidia.css": "/public/prism-okaidia.css"
-    });
+    conf.addPassthroughCopy('posts/**/*.{jpg,png}');
 
     conf.addFilter("readableDate", (dateObj) => new Intl.DateTimeFormat('en-GB', {
         weekday: "long",

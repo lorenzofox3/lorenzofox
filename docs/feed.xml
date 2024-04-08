@@ -4,13 +4,22 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-04-04T00:00:00Z</updated>
+  <updated>2024-04-10T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
-    <title>Template engine with streaming capability</title>
+    <title>Template engine with streaming capability - part 2/2</title>
+    <link href="https://lorenzofox.dev/posts/html-streaming-part-2/"/>
+    <updated>2024-04-10T00:00:00Z</updated>
+    <id>https://lorenzofox.dev/posts/html-streaming-part-2/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;
+In &lt;a href=&quot;/posts/html-streaming-part-1&quot; rel=&quot;prev&quot;&gt;the previous article&lt;/a&gt; we built a template engine that supports streaming. Unfortunately, it did not perform very well when 
+rendering a test page (a blog home page) compared to other popular libraries. In this article, we will look at several techniques that will lead us to a more efficient implementation.
+&lt;/p&gt;</content>
+  </entry><entry>
+    <title>Template engine with streaming capability - part 1/2</title>
     <link href="https://lorenzofox.dev/posts/html-streaming-part-1/"/>
     <updated>2024-04-04T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/html-streaming-part-1/</id>
