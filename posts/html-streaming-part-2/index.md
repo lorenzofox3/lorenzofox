@@ -1,6 +1,6 @@
 ---
 title: Template engine with streaming capability - part 2/2
-date: 2024-04-10
+date: 2024-04-09
 description: Post about how to improve the performance of a streaming HTML template engine  
 ---
 
@@ -83,7 +83,7 @@ function *Greet({name}) {
 }
 ```
 
-which has three items which will eventually become as many asynchronous chunks in the ``_render`` function. That is a shame as we could simply generate one item with:
+which has three items that will eventually become as many asynchronous chunks in the ``_render`` function. That is a shame as we could simply generate one item with:
 
 ```js
 function *Greet({name}) {
@@ -126,7 +126,7 @@ const compile = (templateParts, ...values) => {
   const src = buildSource(templateParts, ...values);
   const args = [
     'utils',
-    Array.from({ length: values.length }, (_, i) => 'arg' + i),
+    ...Array.from({ length: values.length }, (_, i) => 'arg' + i)
   ];
   const gen = new GeneratorFunction(...args, src);
   return (...values) => gen({ escape }, ...values);
@@ -197,7 +197,7 @@ function* _render(template, controller) {
 }
 ```
 
-The ``_render`` function is now synchronous and takes the stream controller as a parameter. We now enqueue the chunks when they are ready and no longer yield anything except Promises.
+The ``_render`` function is now synchronous and takes the stream controller as a parameter. We enqueue the chunks when they are ready and no longer yield anything except Promises.
 This has the effect of pausing the routine while waiting for the caller to resume the execution once the asynchronous value is available.
 
 The caller is the ReadableStream itself, and there is no need to pass through an async generator that was creating a lot of useless Promises:
@@ -232,7 +232,58 @@ It can wait for that Promise to be resolved and then resume the execution of the
 
 ## Buffer chunks
 
+Calling the internal ReadableStream controller enqueuing function 14 times can seem harmless, but it is not. 
+I must admit that I was surprised when I experienced this, as I thought Node would be able to optimise its implementation, but apparently not.     
+I have already planned to dig in the source code.  
 
+We can change our strategy: let's buffer strings together until there is a Promise (which we have to wait for anyway) and enqueue the buffered data at that moment. All we have to do is change the ``render`` function:
+
+```js
+function render(template) {
+  return new ReadableStream({
+    start(controller) {
+      const buffer = [];
+      const iterable = _render(template, {
+        enqueue: (val) => buffer.push(val), // we pass our own "controller" instead
+      });
+
+      return pump();
+
+      async function pump(chunk) {
+        const { value } = iterable.next(chunk);
+
+        if (value?.then) {
+          if (buffer.length) {
+            controller.enqueue(buffer.join('')); // enqueue at that moment
+          }
+          const asyncChunk = await value;
+          buffer.length = 0; // empty buffer
+          return pump(asyncChunk);
+        }
+
+        // if left over
+        if (buffer.length) {
+          controller.enqueue(buffer.join(''));
+        }
+
+        controller.close();
+      }
+    },
+  });
+}
+```
+
+And we are now performing almost as well as Pug with a server that can handle 1550 requests per second!
+
+## Conclusion
+
+We went through three different techniques to optimise the template engine, and we now have very good performance on the test case. Performance is not the only criterion: after all, 
+EJS is downloaded 13 million times a week, yet it performs _poorly_ compared to Pug and [tpl-stream](https://github.com/lorenzofox3/tpl-stream)(the library we built). Given its popularity, we can assume that the EJS's performance is
+_good enough_ for the vast majority of people and use cases. 
+
+[tpl-stream](https://github.com/lorenzofox3/tpl-stream) is very flexible, as it stands on Javascript tagged templates. It has no build step involved, and a small (yet fairly easy to read) code base with no particular obfuscation to get even more performance gains.
+In the browser, you will only have to download [935 bytes](https://bundlephobia.com/package/tpl-stream) to get the library (minified and gzipped), while the install size with npm is [about 10kb](https://packagephobia.com/result?p=tpl-stream); in order words, it is 600 times smaller than the [size of Pug](https://packagephobia.com/result?p=tpl-stream)!
+All this makes the library pleasant to work with and easy to maintain, which are other important advantages, at least in my opinion.
 
 
 

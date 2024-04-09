@@ -4,7 +4,7 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-04-10T00:00:00Z</updated>
+  <updated>2024-04-09T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
@@ -12,7 +12,7 @@
   </author><entry>
     <title>Template engine with streaming capability - part 2/2</title>
     <link href="https://lorenzofox.dev/posts/html-streaming-part-2/"/>
-    <updated>2024-04-10T00:00:00Z</updated>
+    <updated>2024-04-09T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/html-streaming-part-2/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
 In &lt;a href=&quot;/posts/html-streaming-part-1&quot; rel=&quot;prev&quot;&gt;the previous article&lt;/a&gt; we built a template engine that supports streaming. Unfortunately, it did not perform very well when 

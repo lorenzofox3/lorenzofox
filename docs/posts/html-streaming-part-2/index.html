@@ -63,7 +63,7 @@
             
             <p class="publication-date">
                 First publication date:
-                <time datetime="2024-04-10">Wednesday 10 April 2024</time>
+                <time datetime="2024-04-09">Tuesday 9 April 2024</time>
             </p>
             
         </div>
@@ -128,7 +128,7 @@ In practice, rendering the page once generates 87 chunks (and as many Promises) 
     <span class="token keyword">yield</span> <span class="token function">escape</span><span class="token punctuation">(</span><span class="token function">String</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">yield</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;/p></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span></code></pre>
-<p>which has three items which will eventually become as many asynchronous chunks in the <code>_render</code> function. That is a shame as we could simply generate one item with:</p>
+<p>which has three items that will eventually become as many asynchronous chunks in the <code>_render</code> function. That is a shame as we could simply generate one item with:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token operator">*</span><span class="token function">Greet</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span>name<span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">yield</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;p></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">escape</span><span class="token punctuation">(</span><span class="token function">String</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&lt;/p></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span></code></pre>
@@ -156,7 +156,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
   <span class="token keyword">const</span> src <span class="token operator">=</span> <span class="token function">buildSource</span><span class="token punctuation">(</span>templateParts<span class="token punctuation">,</span> <span class="token operator">...</span>values<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">const</span> args <span class="token operator">=</span> <span class="token punctuation">[</span>
     <span class="token string">'utils'</span><span class="token punctuation">,</span>
-    Array<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">length</span><span class="token operator">:</span> values<span class="token punctuation">.</span>length <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> i</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">'arg'</span> <span class="token operator">+</span> i<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token operator">...</span>Array<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">length</span><span class="token operator">:</span> values<span class="token punctuation">.</span>length <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> i</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">'arg'</span> <span class="token operator">+</span> i<span class="token punctuation">)</span>
   <span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token keyword">const</span> gen <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GeneratorFunction</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token punctuation">,</span> src<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token operator">...</span>values</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">gen</span><span class="token punctuation">(</span><span class="token punctuation">{</span> escape <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token operator">...</span>values<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -209,7 +209,7 @@ Especially here, where we have a recursion: the <code>_render</code> function ha
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<p>The <code>_render</code> function is now synchronous and takes the stream controller as a parameter. We now enqueue the chunks when they are ready and no longer yield anything except Promises.
+<p>The <code>_render</code> function is now synchronous and takes the stream controller as a parameter. We enqueue the chunks when they are ready and no longer yield anything except Promises.
 This has the effect of pausing the routine while waiting for the caller to resume the execution once the asynchronous value is available.</p>
 <p>The caller is the ReadableStream itself, and there is no need to pass through an async generator that was creating a lot of useless Promises:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">render</span><span class="token punctuation">(</span><span class="token parameter">template</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -236,6 +236,50 @@ This has the effect of pausing the routine while waiting for the caller to resum
 It can wait for that Promise to be resolved and then resume the execution of the routine, passing the resolved value.</p>
 <p><code>controller.enqueue</code> is still called 14 times, but the async <code>pump</code> function is only called twice, and we have improved the performances even more: the server can now handle 944 requests per second.</p>
 <h2 id="buffer-chunks" tabindex="-1"><a class="header-anchor" href="#buffer-chunks">Buffer chunks</a></h2>
+<p>Calling the internal ReadableStream controller enqueuing function 14 times can seem harmless, but it is not.
+I must admit that I was surprised when I experienced this, as I thought Node would be able to optimise its implementation, but apparently not.<br>
+I have already planned to dig in the source code.</p>
+<p>We can change our strategy: let’s buffer strings together until there is a Promise (which we have to wait for anyway) and enqueue the buffered data at that moment. All we have to do is change the <code>render</code> function:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">render</span><span class="token punctuation">(</span><span class="token parameter">template</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ReadableStream</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token function">start</span><span class="token punctuation">(</span><span class="token parameter">controller</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token keyword">const</span> iterable <span class="token operator">=</span> <span class="token function">_render</span><span class="token punctuation">(</span>template<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+        <span class="token function-variable function">enqueue</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">val</span><span class="token punctuation">)</span> <span class="token operator">=></span> buffer<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// we pass our own "controller" instead</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token keyword">return</span> <span class="token function">pump</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">pump</span><span class="token punctuation">(</span><span class="token parameter">chunk</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> <span class="token punctuation">{</span> value <span class="token punctuation">}</span> <span class="token operator">=</span> iterable<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>value<span class="token operator">?.</span>then<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          <span class="token keyword">if</span> <span class="token punctuation">(</span>buffer<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            controller<span class="token punctuation">.</span><span class="token function">enqueue</span><span class="token punctuation">(</span>buffer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// enqueue at that moment</span>
+          <span class="token punctuation">}</span>
+          <span class="token keyword">const</span> asyncChunk <span class="token operator">=</span> <span class="token keyword">await</span> value<span class="token punctuation">;</span>
+          buffer<span class="token punctuation">.</span>length <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">// empty buffer</span>
+          <span class="token keyword">return</span> <span class="token function">pump</span><span class="token punctuation">(</span>asyncChunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment">// if left over</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>buffer<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          controller<span class="token punctuation">.</span><span class="token function">enqueue</span><span class="token punctuation">(</span>buffer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        controller<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>And we are now performing almost as well as Pug with a server that can handle 1550 requests per second!</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>We went through three different techniques to optimise the template engine, and we now have very good performance on the test case. Performance is not the only criterion: after all,
+EJS is downloaded 13 million times a week, yet it performs <em>poorly</em> compared to Pug and <a href="https://github.com/lorenzofox3/tpl-stream">tpl-stream</a>(the library we built). Given its popularity, we can assume that the EJS’s performance is
+<em>good enough</em> for the vast majority of people and use cases.</p>
+<p><a href="https://github.com/lorenzofox3/tpl-stream">tpl-stream</a> is very flexible, as it stands on Javascript tagged templates. It has no build step involved, and a small (yet fairly easy to read) code base with no particular obfuscation to get even more performance gains.
+In the browser, you will only have to download <a href="https://bundlephobia.com/package/tpl-stream">935 bytes</a> to get the library (minified and gzipped), while the install size with npm is <a href="https://packagephobia.com/result?p=tpl-stream">about 10kb</a>; in order words, it is 600 times smaller than the <a href="https://packagephobia.com/result?p=tpl-stream">size of Pug</a>!
+All this makes the library pleasant to work with and easy to maintain, which are other important advantages, at least in my opinion.</p>
 
 </main>
 <footer class="wide" id="main-footer">
