@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "eleventy --serve",
-    "build": "rm -rf docs/ && NODE_ENV=production eleventy"
+    "build": "rm -rf docs/ && NODE_ENV=production eleventy && echo \"- lorenzofox.dev\" >> docs/CNAME"
   },
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1",
