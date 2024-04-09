@@ -7,7 +7,7 @@ description: Post about how to improve the performance of a streaming HTML templ
 <div class="intro"> 
 <p class="wide">
 In <a href="/posts/html-streaming-part-1" rel="prev">the previous article</a> we built a template engine that supports streaming. Unfortunately, it did not perform very well when 
-rendering a test page (a blog home page) compared to other popular libraries. In this article, we will look at several techniques that will lead us to a more efficient implementation.
+rendering a <a href="/posts/html-streaming-part-1/#performance-evaluation">test page</a> (a blog home page) compared to other popular libraries. In this article, we will look at several techniques that will lead us to a more efficient implementation.
 </p>
 </div>
 
@@ -83,7 +83,7 @@ function *Greet({name}) {
 }
 ```
 
-which has three items and eventually as many asynchronous chunks. That is a shame as we could simply generate one item with:
+which has three items which will eventually become as many asynchronous chunks in the ``_render`` function. That is a shame as we could simply generate one item with:
 
 ```js
 function *Greet({name}) {
@@ -133,7 +133,7 @@ const compile = (templateParts, ...values) => {
 };
 ```
 
-We use a ``WeakMap`` to cache the compiled functions to ensure that each template is compiled once and only once.
+We use a ``WeakMap`` to cache the compiled functions to ensure that each template is compiled once and only once because this is a costly operation.
 
 The compiled functions have as many parameters as there are values to interpolate, and we create a binding named ``arg{index}`` for each of them. 
 In addition to these parameters, the first argument will be an object of some utility functions (like ``escape``) so that we can use them in the source code we are about to generate:
@@ -166,7 +166,72 @@ On the other hand, we now log only 15 chunks.
 
 ## Avoid Promise overhead
 
-blah Coroutines
+Async functions introduce an overhead that can usually be disregarded. In our case this is a bit different as the penalty increases with the complexity of the template we are trying to render.   
+
+Moreover, we use async constructs for the convenience of their control flows, but they are semantically a bit different from what we want to achieve and waste resources by creating unnecessary Promises. 
+Again, in the test page there is only one async call to wait for (to fetch the posts data).
+
+Ideally we would like to have a main synchronous function that delegates the control to an async function only when it is necessary, but this is impossible with async functions. 
+Especially here, where we have a recursion: the ``_render`` function has to be async all the way, even though it deals with synchronous execution most of the time.  
+
+There is a solution: we can think of ``_render`` as a recursive [coroutine](/posts/coroutine)!
+
+```js
+function* _render(template, controller) {
+  for (const chunk of template) {
+    if (typeof chunk === 'string') {
+      controller.enqueue(chunk); 
+    } else if (chunk?.[Symbol.iterator]) {
+      yield* _render(chunk, controller); // delegation !
+    } else if (chunk?.then) {
+      const resolved = yield chunk; // pauses only when necessary
+      if (typeof resolved === 'string') {
+        controller.enqueue(resolved);
+      } else {
+        yield* _render(resolved, controller); // delegation !
+      }
+    } else {
+      throw new Error('Unsupported chunk');
+    }
+  }
+}
+```
+
+The ``_render`` function is now synchronous and takes the stream controller as a parameter. We now enqueue the chunks when they are ready and no longer yield anything except Promises.
+This has the effect of pausing the routine while waiting for the caller to resume the execution once the asynchronous value is available.
+
+The caller is the ReadableStream itself, and there is no need to pass through an async generator that was creating a lot of useless Promises:
+
+```js
+function render(template) {
+  return new ReadableStream({
+    start(controller) {
+      const iterable = _render(template, controller);
+
+      return pump();
+
+      async function pump(chunk) {
+        const { value } = iterable.next(chunk);
+
+        if (value?.then) {
+          const asyncChunk = await value;
+          return pump(asyncChunk);
+        }
+
+        controller.close();
+      }
+    },
+  });
+}
+```
+
+It passes its internal controller to the ``_render`` routine, which is executed until it pauses (when a Promise is yielded). 
+It can wait for that Promise to be resolved and then resume the execution of the routine, passing the resolved value.
+
+``controller.enqueue`` is still called 14 times, but the async ``pump`` function is only called twice, and we have improved the performances even more: the server can now handle 944 requests per second.
+
+## Buffer chunks
+
 
 
 

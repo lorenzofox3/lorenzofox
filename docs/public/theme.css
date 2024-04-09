@@ -112,8 +112,8 @@ td, th {
     display: grid;
     grid-template-rows: auto 1fr;
     row-gap: 0.5em;
-
     background-color: var(--secondary-color);
+    background: var(--secondary-color) linear-gradient(to bottom, color-mix(in lab, var(--secondary-color), black 50%), var(--secondary-color));
     color: var(--secondary-font-color);
 
     .heading {
@@ -164,8 +164,8 @@ main {
     }
 
     & .intro:first-child {
-
-        background: linear-gradient(to bottom, var(--secondary-color), color-mix(in lab, var(--secondary-color) 82%, var(--bg-app)));
+        background-color: var(--secondary-color);
+        background: linear-gradient(to bottom, var(--secondary-color), color-mix(in lab, var(--secondary-color) 75%, var(--bg-app)));
         color: var(--secondary-font-color);
         grid-column: 1 / -1;
         border-bottom: 2px solid var(--block-border-color);

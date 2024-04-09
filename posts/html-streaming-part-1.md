@@ -68,7 +68,14 @@ To build a sequence we will use a [generator function](https://developer.mozilla
 ```js
 import {test} from 'zora';
 
-const stringify = iterable => [...iterable].join('')
+const stringify = iterable => [...iterable].join('');
+
+test('literals are intepolated as strings', ({eq}) => {
+    eq(stringify(html`<p>${'hello'}</p>`), '<p>hello</p>');
+    eq(stringify(html`<p>${42}</p>`), '<p>42</p>');
+    eq(stringify(html`<p aria-hidden="${true}">blah</p>`), '<p aria-hidden="true">blah</p>');
+    eq(stringify(html`<p>${undefined}</p>`), '<p>undefined</p>');
+});
 
 function *html(templateParts, ...values){
     const [first, ...rest] = templateParts;
@@ -78,14 +85,6 @@ function *html(templateParts, ...values){
         yield templatePart;
     }
 }
-
-test('literals are intepolated as strings', ({eq}) => {
-    eq(stringify(html`<p>${'hello'}</p>`), '<p>hello</p>');
-    eq(stringify(html`<p>${42}</p>`), '<p>42</p>');
-    eq(stringify(html`<p aria-hidden="${true}">blah</p>`), '<p aria-hidden="true">blah</p>');
-    eq(stringify(html`<p>${undefined}</p>`), '<p>undefined</p>');
-});
-
 ```
 
 First, we take out the first template part, so that we know that both arrays ``rest`` and ``values`` have exactly the same number of items.
@@ -102,6 +101,15 @@ We can then iterate over the pairs, yield each element one by one and ensure tha
 #### Escape literals
 
 ```js
+test('Strings are HTML escpaed when interpolated', ({eq}) => {
+    eq(stringify(
+        html`<p>${'<script>window.alert("pwned")</script>'}</p>`), 
+        '<p>&lt;script&gt;window.alert(&quot;pwned&quot;)&lt;/script&gt;</p>');
+    eq(stringify(
+        html`<p attr="${"/><script></script>"}"></p>`), 
+        '<p attr="/&gt;&lt;script&gt;&lt;/script&gt;"></p>');
+});
+
 const escapeMap = {
     '&': '&amp;',
     '<': '&lt;',
@@ -127,13 +135,6 @@ function *html(templateParts, ...values){
         yield templatePart;
     }
 }
-
-test('Strings are HTML escpaed when interpolated', ({eq}) => {
-    eq(stringify(html`<p>${'<script>window.alert("pwned")</script>'}</p>`), 
-        '<p>&lt;script&gt;window.alert(&quot;pwned&quot;)&lt;/script&gt;</p>');
-    eq(stringify(html`<p attr="${"/><script></script>"}"></p>`), 
-        '<p attr="/&gt;&lt;script&gt;&lt;/script&gt;"></p>');
-});
 ```
 
 The ``escape`` function encodes a set of specific characters into their entity equivalent to make sure that a malicious string cannot be injected.
@@ -141,6 +142,13 @@ The ``escape`` function encodes a set of specific characters into their entity e
 #### Compose templates
 
 ```js
+test(`templates can be composed together`, ({ eq }) => {
+    eq(
+        stringify(
+        html`<p>foo ${html`<span>${42}</span>`}</p>`),
+        '<p>foo <span>42</span></p>',
+    );
+});
 
 function* html(templateParts, ...values) {
     const [first, ...rest] = templateParts;
@@ -154,14 +162,6 @@ function* html(templateParts, ...values) {
         yield templatePart;
     }
 }
-
-
-test(`templates can be composed together`, ({ eq }) => {
-    eq(
-        stringify(html`<p>foo ${html`<span>${42}</span>`}</p>`),
-        '<p>foo <span>42</span></p>',
-    );
-});
 ```
 The main difference is that we now check the _type_ of the interpolated value. Generators are iterables, so that they implement ``[Symbol.iterator]``. This means that a template will check this condition. Strings are also iterables, but we don't want to 
 iterate over every character of the string: hence the second check. If both checks pass, we simply delegate the control to the iterable ``value`` using ``yield*`` operator.
@@ -172,6 +172,19 @@ We leave that job to the upcoming ``render`` function
 #### Thenable (Promises)
 
 ```js
+test(`html yield Promise like as they are`, ({ eq }) => {
+    const promise = Promise.resolve(42);
+    const thenable = {
+        then() {
+            return 42;
+        }
+    };
+    eq(
+        [...html`<div>${promise}</div><p>${thenable}</p>`],
+        ['<div>', promise, '</div><p>', thenable, '</p>'],
+    );
+});
+
 function* html(templateParts, ...values) {
     const [first, ...rest] = templateParts;
     yield first;
@@ -186,23 +199,11 @@ function* html(templateParts, ...values) {
         yield templatePart;
     }
 }
-
-test(`html yield Promise like as they are`, ({ eq }) => {
-    const promise = Promise.resolve(42);
-    const thenable = {
-        then() {
-            return 42;
-        }
-    };
-    eq(
-        [...html`<div>${promise}</div><p>${thenable}</p>`],
-        ['<div>', promise, '</div><p>', thenable, '</p>'],
-    );
-});
 ```
 
 Anything that can be awaited implement ``then``. If this check passes we just yield the "Promise like" value to the ``render`` function:
 there is nothing we can do at this point, and the strategy for handling asynchronous structures may vary form renderer to renderer.
+One renderer could choose to pause the stream and wait for the Promise to resolve. Other could insert a placeholder and, later when the Promise has resolved, append some code to replace that placeholder with the actual value (this technique can be used for out of order streaming). 
 
 ## render function
 
