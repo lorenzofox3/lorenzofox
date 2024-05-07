@@ -4,12 +4,20 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-04-09T00:00:00Z</updated>
+  <updated>2024-05-07T12:32:11Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
+    <title>Let&#39;s build a great switch button</title>
+    <link href="https://lorenzofox.dev/posts/switch-button/"/>
+    <updated>2024-05-07T12:32:11Z</updated>
+    <id>https://lorenzofox.dev/posts/switch-button/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;
+&lt;a href=&quot;https://www.w3.org/WAI/ARIA/apg/patterns/switch/&quot;&gt;Switch buttons&lt;/a&gt; (and alike) are very popular UI widgets. Semantically, they should behave like regular buttons, but with a binary state. Let&#39;s see how we can progressively enhance the good old button with web components to get the expected behaviour.
+&lt;/p&gt;</content>
+  </entry><entry>
     <title>Template engine with streaming capability - part 2/2</title>
     <link href="https://lorenzofox.dev/posts/html-streaming-part-2/"/>
     <updated>2024-04-09T00:00:00Z</updated>
