@@ -122,6 +122,7 @@ For this example, we use the ``::before`` and ``::after`` pseudo-elements to add
     background-color: inherit;
     
     position: relative;
+    isolation: isolate;
 }
 ```
 
