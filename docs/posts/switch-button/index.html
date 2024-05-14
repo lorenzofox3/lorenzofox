@@ -61,6 +61,11 @@
         <div class="title">
             <h1>Let's build a great switch button</h1>
             
+            <p class="publication-date">
+                First publication date:
+                <time datetime="2024-05-14">Tuesday 14 May 2024</time>
+            </p>
+            
         </div>
     </div>
 </header>
@@ -73,7 +78,7 @@
 <h2 id="extend-built-in-button" tabindex="-1"><a class="header-anchor" href="#extend-built-in-button">Extend built in button</a></h2>
 <p>When creating custom elements, you can extend the HTMLElement class and build a brand new element, or you can extend a built-in HTML element. This is a great way to enhance regular HTML elements.
 The downside is that Apple has stated that they <a href="https://github.com/WICG/webcomponents/issues/509#issuecomment-230700060">won’t implement this part of the spec</a>. Nevertheless, you can use a <a href="https://github.com/WebReflection/custom-elements-builtin">polyfill</a> to work around Safari’s issues.
-Another technique is to wrap the base element within a custom element that adds the expected behaviour to the child target.</p>
+Another technique is to wrap the base element within a custom element that adds the expected behaviour to the child target but it adds unnecessary DOM nodes.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">UISwitchButton</span> <span class="token keyword">extends</span> <span class="token class-name">HTMLButtonElement</span> <span class="token punctuation">{</span>
     <span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'connected'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -132,7 +137,7 @@ You can also add a property (<code>checked</code>) that reflects on this attribu
 <span class="token punctuation">}</span></code></pre>
 <p>There are a few important things to note:</p>
 <ul>
-<li>we emit the custom event only when the user interacts with the element (not when the attribute changes): if the attribute (or property) changes, it must be the result of an external component that already knows the new switch state because it wants to force the value.</li>
+<li>we emit the custom event only when the user interacts with the element (not when the attribute changes): if the attribute (or property) changes, it must be the result of an external component’s action that already knows the new switch state as it wants to force the value.</li>
 <li>If this event fires, it means we are already in the context of the switch button and we can therefore stop the propagation of the origin click event to narrow the API surface of our component.</li>
 <li>in the <code>connected</code> lifecycle callback we need to manually trigger the <code>attributeChangedCallback</code>: the <code>checked</code> attribute defines the value of <code>aria-checked</code>, but the absence of <code>checked</code> does not trigger the <code>attributeChangedCallback</code> when the component is mounted, and the value of <code>aria-checked</code> will not be set.</li>
 <li>for some edge case we need to <em>upgrade</em> the <code>checked</code> property. The problem occurs when the element is being created manually while the custom element has not yet been defined:</li>
@@ -144,10 +149,90 @@ el<span class="token punctuation">.</span>checked <span class="token operator">=
 document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">"body"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>el<span class="token punctuation">)</span><span class="token punctuation">;</span>
 customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">"ui-switch"</span><span class="token punctuation">,</span> UISwitchButton<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token keyword">extends</span><span class="token operator">:</span> <span class="token string">"button"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 <p>In many cases you don’t need to be so rigorous, but these are good practices anyway. You can find more good practices on <a href="https://web.dev/articles/custom-elements-best-practices">web.dev</a>.</p>
-<p>The good thing about inheriting from the button element is that it directly gets all of the button’s default behaviour, notably  in terms of accessibility: form element, focusable, keyboard support for <kbd>Space</kbd> and <kdb>Enter</kbd>, default button styling, etc.</p>
+<p>The good thing about inheriting from the button element is that it directly gets all of the button’s default behaviour, notably in terms of accessibility: form element, focusable, keyboard support for <kbd>Space</kbd> and <kdb>Enter</kbd>, disabling support, default button styling, etc.</p>
 <h2 id="styling" tabindex="-1"><a class="header-anchor" href="#styling">styling</a></h2>
 <p>You can easily style the switch button with CSS, using the <code>[is=ui-switch]</code> selector together with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting">nested CSS</a> to encapsulate its rules and manage the specificity correctly.<br>
-For this example, we use the <code>::before</code> and <code>::after</code> pseudo-elements to add <code>on</code> and <code>off</code> labels.</p>
+For this example, we use the <code>::before</code> and <code>::after</code> pseudo-elements to add <code>on</code> and <code>off</code> labels (I have always found confusing not to have the current state) and to draw the <em>thumb</em>.</p>
+<pre class="language-css"><code class="language-css"><span class="token selector">[is="ui-switch"]</span> <span class="token punctuation">{</span>
+    <span class="token property">--control-color</span><span class="token punctuation">:</span> black<span class="token punctuation">;</span>
+    <span class="token property">--height</span><span class="token punctuation">:</span> 1.5em<span class="token punctuation">;</span>
+    <span class="token property">--_inset</span><span class="token punctuation">:</span> 2px<span class="token punctuation">;</span>
+    
+    <span class="token property">user-select</span><span class="token punctuation">:</span> none<span class="token punctuation">;</span>
+    
+    <span class="token property">aspect-ratio</span><span class="token punctuation">:</span> 2 / 1<span class="token punctuation">;</span>
+    <span class="token property">height</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--height<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token property">border</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--_inset<span class="token punctuation">)</span> solid currentColor<span class="token punctuation">;</span>
+    <span class="token property">border-radius</span><span class="token punctuation">:</span> <span class="token function">calc</span><span class="token punctuation">(</span><span class="token function">var</span><span class="token punctuation">(</span>--height<span class="token punctuation">)</span> * 2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token property">color</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--control-color<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token property">background-color</span><span class="token punctuation">:</span> inherit<span class="token punctuation">;</span>
+    
+    <span class="token property">position</span><span class="token punctuation">:</span> relative<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>This gives the default layout of the component. <code>user-select</code> prevents the label from being selectable, size and theme colours can be controlled with css variables.
+We set the position to <code>relative</code> to be able to position the thumb.</p>
+<p>Let’s add the thumb and the label in their default state (when the switch is off):</p>
+<pre class="language-css"><code class="language-css"><span class="token selector">[is=ui-switch]</span> <span class="token punctuation">{</span>
+
+    <span class="token comment">/* ... */</span>
+    
+    <span class="token comment">/* thumb */</span>
+    <span class="token selector">&amp;::before</span> <span class="token punctuation">{</span>
+        <span class="token property">--_thumb-size</span><span class="token punctuation">:</span> 1em<span class="token punctuation">;</span>
+        <span class="token property">content</span><span class="token punctuation">:</span> <span class="token string">""</span><span class="token punctuation">;</span>
+        
+        <span class="token property">aspect-ratio</span><span class="token punctuation">:</span> 1<span class="token punctuation">;</span>
+        <span class="token property">width</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--_thumb-size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token property">border-radius</span><span class="token punctuation">:</span> 100%<span class="token punctuation">;</span>
+        
+        <span class="token property">background</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--control-color<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        <span class="token property">inset</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span>
+        <span class="token property">position</span><span class="token punctuation">:</span> absolute<span class="token punctuation">;</span>
+        <span class="token property">margin-block</span><span class="token punctuation">:</span> auto<span class="token punctuation">;</span>
+        <span class="token property">margin-inline-start</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--_inset<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        <span class="token property">transition</span><span class="token punctuation">:</span> margin 0.3s ease-out<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">/* label */</span>
+    <span class="token selector">&amp;::after</span> <span class="token punctuation">{</span>
+        <span class="token property">content</span><span class="token punctuation">:</span> <span class="token string">"off"</span><span class="token punctuation">;</span>
+        <span class="token property">position</span><span class="token punctuation">:</span> absolute<span class="token punctuation">;</span>
+        <span class="token property">left</span><span class="token punctuation">:</span> <span class="token function">calc</span><span class="token punctuation">(</span>100% + 2 * <span class="token function">var</span><span class="token punctuation">(</span>--_inset<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>We give the thumb a perfect circular shape and match the colour to the css variable. For the thumb position we can use a combo
+of <code>inset</code> and <code>margin</code>. We then overwrite the <code>left</code> position with an internal <code>_inset</code> offset.
+We could have just used the css <code>inset</code> property and changed the <code>margin-inline-start</code> property to move the thumb around, but we want it to be animated and this is not possible on margin with values like <code>auto</code> (we need numbers).
+This is what the transition is for.</p>
+<p>For the label we set the content of the pseudo element <code>::after</code> to ``off` and give it the right position.</p>
+<p>Finally, when the switch is checked (and therefor has the <code>checked</code> attribute - or <code>aria-checked=true</code>):</p>
+<pre class="language-css"><code class="language-css"><span class="token selector">[is=ui-switch]</span> <span class="token punctuation">{</span>
+    <span class="token selector">&amp;[checked]</span> <span class="token punctuation">{</span>
+        <span class="token selector">&amp;::before</span> <span class="token punctuation">{</span>
+            <span class="token property">margin-inline-start</span><span class="token punctuation">:</span> <span class="token function">calc</span><span class="token punctuation">(</span>100% - <span class="token function">var</span><span class="token punctuation">(</span>--_thumb-size<span class="token punctuation">)</span> - <span class="token function">var</span><span class="token punctuation">(</span>--_inset<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token selector">&amp;::after</span> <span class="token punctuation">{</span>
+            <span class="token property">content</span><span class="token punctuation">:</span> <span class="token string">"on"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>We only have to change the <code>margin-inline-position</code> and the transition will be activated.</p>
+<p>You can see the result in the following CodePen. I have added a variant to show that the look and feel can easily be changed</p>
+<p class="codepen" data-height="300" data-default-tab="html,result" data-slug-hash="yLWBaNd" data-preview="true" data-user="lorenzofox3" style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/lorenzofox3/pen/yLWBaNd">
+  switch-button</a> by RENARD (<a href="https://codepen.io/lorenzofox3">@lorenzofox3</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+<p>We have left the focus style untouched, so it follows the same design as regular buttons.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>In this short tutorial, we have seen how to enhance a built-in element with web components. Even if Safari does not support it, a polyfill is available, and this technique offers many
+advantages in terms of progressive enhancement, resulting in a lightweight yet very portable component.</p>
 
 </main>
 <footer class="wide" id="main-footer">
