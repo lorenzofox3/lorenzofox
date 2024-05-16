@@ -209,8 +209,8 @@ We set the position to <code>relative</code> to be able to position the thumb.</
 of <code>inset</code> and <code>margin</code>. We then overwrite the <code>left</code> position with an internal <code>_inset</code> offset.
 We could have just used the css <code>inset</code> property and changed the <code>margin-inline-start</code> property to move the thumb around, but we want it to be animated and this is not possible on margin with values like <code>auto</code> (we need numbers).
 This is what the transition is for.</p>
-<p>For the label we set the content of the pseudo element <code>::after</code> to ``off` and give it the right position.</p>
-<p>Finally, when the switch is checked (and therefor has the <code>checked</code> attribute - or <code>aria-checked=true</code>):</p>
+<p>For the label we set the content of the pseudo element <code>::after</code> to <code>off</code> and give it the right position.</p>
+<p>Finally, when the switch is checked (and therfore has the <code>checked</code> attribute - or <code>aria-checked=true</code>):</p>
 <pre class="language-css"><code class="language-css"><span class="token selector">[is=ui-switch]</span> <span class="token punctuation">{</span>
     <span class="token selector">&amp;[checked]</span> <span class="token punctuation">{</span>
         <span class="token selector">&amp;::before</span> <span class="token punctuation">{</span>

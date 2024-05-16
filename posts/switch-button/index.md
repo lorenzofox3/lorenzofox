@@ -169,9 +169,9 @@ of ``inset`` and ``margin``. We then overwrite the ``left`` position with an int
 We could have just used the css ``inset`` property and changed the ``margin-inline-start`` property to move the thumb around, but we want it to be animated and this is not possible on margin with values like ``auto`` (we need numbers).
 This is what the transition is for.
 
-For the label we set the content of the pseudo element ``::after`` to ``off` and give it the right position.
+For the label we set the content of the pseudo element ``::after`` to ``off`` and give it the right position.
 
-Finally, when the switch is checked (and therefor has the ``checked`` attribute - or ``aria-checked=true``):
+Finally, when the switch is checked (and therfore has the ``checked`` attribute - or ``aria-checked=true``):
 
 ```css
 [is=ui-switch] {
