@@ -4,12 +4,21 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-05-14T00:00:00Z</updated>
+  <updated>2024-05-23T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
+    <title>How to avoid mixing business and technical concerns</title>
+    <link href="https://lorenzofox.dev/posts/separation-of-concerns/"/>
+    <updated>2024-05-23T00:00:00Z</updated>
+    <id>https://lorenzofox.dev/posts/separation-of-concerns/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;
+When implementing business cases, you don&#39;t want to have to deal with database transactions, low-level telemetry and other technical details. 
+In this series, we will build a small framework around dependency injection to make sure business and technical concerns are separated.  
+&lt;/p&gt;</content>
+  </entry><entry>
     <title>Let&#39;s build a great switch button</title>
     <link href="https://lorenzofox.dev/posts/switch-button/"/>
     <updated>2024-05-14T00:00:00Z</updated>
