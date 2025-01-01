@@ -204,6 +204,35 @@ We can also use the <code>FromSchema</code> from the same <a href="https://githu
     </video>
     <figcaption>Dev experience with type inference</figcaption>
 </figure>
+<p>Again, we can include these new opinions on how to properly develop an API, directly into the framework.</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span>ProviderFn<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'dismoi'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">CommandInjectables<span class="token operator">&lt;</span>Schema <span class="token keyword">extends</span> JSONSchema<span class="token operator">></span></span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">[</span>CommandName <span class="token keyword">in</span> <span class="token keyword">keyof</span> CommandsDef<span class="token operator">&lt;</span>Schema<span class="token operator">></span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token punctuation">(</span>deps<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token operator">=></span> CommandFn<span class="token operator">&lt;</span>Schema<span class="token punctuation">,</span> CommandName<span class="token operator">></span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">declare</span> <span class="token keyword">function</span> <span class="token generic-function"><span class="token function">defineModule</span><span class="token generic class-name"><span class="token operator">&lt;</span>
+    Schema <span class="token keyword">extends</span> JSONSchema<span class="token punctuation">,</span>
+    Injectables <span class="token keyword">extends</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span>
+<span class="token operator">></span></span></span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token punctuation">{</span>
+    schema<span class="token operator">:</span> Schema<span class="token punctuation">;</span>
+    commands<span class="token operator">:</span> CommandInjectables<span class="token operator">&lt;</span>Schema<span class="token operator">></span><span class="token punctuation">;</span>
+    injectables<span class="token operator">:</span> Injectables
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token operator">:</span> ProviderFn<span class="token operator">&lt;</span>Injectables <span class="token operator">&amp;</span> CommandInjectables<span class="token operator">&lt;</span>Schema<span class="token operator">></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">keyof</span> CommandInjectables<span class="token operator">&lt;</span>Schema<span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></code></pre>
+<p>There are now even less moving parts:</p>
+<ul>
+<li>one must include an implementation for each command defined on the schema</li>
+<li>one cannot include a command implementation if there is no matching definition on the schema</li>
+<li>implementation interfaces must be compatible with the defined API</li>
+</ul>
+<figure>
+    <video controls>
+    <source src="/posts/schema-first-design/define-module.mp4" />
+    </video>
+    <figcaption>Dev experience with type inference on defineModule</figcaption>
+</figure>
+<h3 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h3>
+<p>The schema has become the central piece of our module.</p>
 
 </main>
 <footer class="wide" id="main-footer">

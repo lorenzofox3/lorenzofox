@@ -167,3 +167,38 @@ As you can see in the animation below, you can now explicitly say that a functio
     <figcaption>Dev experience with type inference</figcaption>
 </figure>
 
+Again, we can include these new opinions on how to properly develop an API, directly into the framework. 
+
+```ts
+import {ProviderFn} from 'dismoi';
+
+type CommandInjectables<Schema extends JSONSchema> = {
+    [CommandName in keyof CommandsDef<Schema>]: (deps: any) => CommandFn<Schema, CommandName>
+}
+
+declare function defineModule<
+    Schema extends JSONSchema,
+    Injectables extends Record<string, unknown>
+>(input: {
+    schema: Schema;
+    commands: CommandInjectables<Schema>;
+    injectables: Injectables
+}): ProviderFn<Injectables & CommandInjectables<Schema>, (keyof CommandInjectables<Schema>)[]>
+```
+
+There are now even less moving parts:
+* one must include an implementation for each command defined on the schema
+* one cannot include a command implementation if there is no matching definition on the schema
+* implementation interfaces must be compatible with the defined API
+
+<figure>
+    <video controls>
+    <source src="/posts/schema-first-design/define-module.mp4" />
+    </video>
+    <figcaption>Dev experience with type inference on defineModule</figcaption>
+</figure>
+
+### Conclusion
+
+The schema has become the central piece of our module.
+
