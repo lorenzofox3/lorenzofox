@@ -31,6 +31,7 @@ p, h1, h2, h3, h4, h5, h6 {
 
 img,
 picture,
+video,
 canvas {
     display: block;
     max-inline-size: 100%;
@@ -70,7 +71,7 @@ body {
 figure {
     margin-block: 1em;
 
-    > img {
+    > img, video {
         box-shadow: 0 0.25em 0.4em 0 var(--shadow-color);
     }
 

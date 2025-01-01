@@ -68,7 +68,7 @@ const schema = {
 I invite you to go through the [JSON schema documentation](https://json-schema.org) for more details on the syntax. But, even without that knowledge, you can 
 understand the overall schema definition with some fields being informative(description, title, etc.) and others being declarative of the data contracts.  
 
-The syntax seems a bit verbose, but it brings a lot of flexibility and power as we will soon see.
+The syntax seems a bit verbose, but it brings a lot of flexibility and power as we will soon see. You could anyway avoid some boilerplate by generating the schema on the fly based on a record of command name/command input schema, for example.
 
 ### Runtime behaviour
 
@@ -136,4 +136,34 @@ That's great, but let's see how we can improve the developer experience even fur
 In the Javascript ecosystem, [Typescript](https://www.typescriptlang.org/), which brings static typing to Javascript, has also become a popular tool for describing data structures and enforcing their consistency throughout the software stack. However, types disappear at runtime and are less useful when it comes to building runtime logic (i.e. actually validating a data input passed to a function, for example).
 For these reasons, developers sometimes tend to duplicate the data structure definition to accommodate different use cases, or rely on libraries that are more specialised and less versatile than a *dumb* serialisable format like json.
 
-The good news, is that you can use libraries to infer types from a JSON schema. Let's see how we can define with a JSON schema, the API of the command we developed in the [previous article](/posts/separation-of-concerns)
+The good news, is that you can use libraries to infer types from a JSON schema. If you paid attention to the schema definiton in the introduction, you should have noticed that it ``satisfies`` a JSON schema. This gives you auto-completion when writing your schema, and makes sure you don't have any syntax errors.
+We can also use the ``FromSchema`` from the same [json-schema-to-ts library](https://github.com/thomasaribart/json-schema-to-ts) to infer the definition of the commands.
+
+```typescript
+import {JSONSchema, FromSchema} from 'json-schema-to-ts';
+
+type CommandsDef<Schema extends JSONSchema> = FromSchema<Schema> extends {
+    commands: infer Commands
+} ? Commands : never;
+```
+
+In the same way, we can go further and express the command signature (assuming for the moment, the output is always ``void``): 
+
+```ts
+type CommandInput<Schema extends JSONSchema, Name extends keyof CommandsDef<Schema>> = CommandsDef<Schema>[Name] extends {
+    input: infer Input
+} ? Input : never;
+
+type CommandFn<Schema extends JSONSchema, Name extends keyof CommandsDef<Schema>> = 
+    (input: CommandInput<Schema, Name>) => Promise<void>
+```
+
+As you can see in the animation below, you can now explicitly say that a function is an implementation of the command defined by the schema, and you will get a compilation error if you change either the function signature, or the schema without reflecting the change in a compatible way.
+
+<figure>
+    <video controls>
+    <source src="/posts/schema-first-design/transfer-money-devx.mp4" />
+    </video>
+    <figcaption>Dev experience with type inference</figcaption>
+</figure>
+

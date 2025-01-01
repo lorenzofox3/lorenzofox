@@ -23,7 +23,7 @@ module.exports = function (conf) {
         const introP =  (content.split('</p>')[0]).split('<p class="wide">')[1];
         return `<p>${introP}</p>`
     });
-    conf.addPassthroughCopy('posts/**/*.{jpg,png}');
+    conf.addPassthroughCopy('posts/**/*.{jpg,png,mp4}');
 
     conf.addFilter("readableDate", (dateObj) => new Intl.DateTimeFormat('en-GB', {
         weekday: "long",

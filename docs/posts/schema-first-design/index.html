@@ -126,7 +126,7 @@ There are several development methodologies that focus on first defining a contr
 <span class="token punctuation">}</span> <span class="token keyword">as</span> <span class="token keyword">const</span> satisfies JSONSchema<span class="token punctuation">;</span></code></pre>
 <p>I invite you to go through the <a href="https://json-schema.org">JSON schema documentation</a> for more details on the syntax. But, even without that knowledge, you can
 understand the overall schema definition with some fields being informative(description, title, etc.) and others being declarative of the data contracts.</p>
-<p>The syntax seems a bit verbose, but it brings a lot of flexibility and power as we will soon see.</p>
+<p>The syntax seems a bit verbose, but it brings a lot of flexibility and power as we will soon see. You could anyway avoid some boilerplate by generating the schema on the fly based on a record of command name/command input schema, for example.</p>
 <h3 id="runtime-behaviour" tabindex="-1"><a class="header-anchor" href="#runtime-behaviour">Runtime behaviour</a></h3>
 <p>Now that we have a definition of the contract, we can easily implement data validation. In the Node.js ecosystem, there are several libraries for building validation on top of JSON schemas, one of the most popular being <a href="https://ajv.js.org/">ajv</a>. Since we want our module contract to be fully defined by the schema, we can modify the <code>defineModule</code> of the framework built in the previous article to enforce this new policy.
 The new implementation could be</p>
@@ -183,7 +183,27 @@ What’s left is to map the command input schema and the command factory togethe
 <h3 id="developer-experience" tabindex="-1"><a class="header-anchor" href="#developer-experience">Developer experience</a></h3>
 <p>In the Javascript ecosystem, <a href="https://www.typescriptlang.org/">Typescript</a>, which brings static typing to Javascript, has also become a popular tool for describing data structures and enforcing their consistency throughout the software stack. However, types disappear at runtime and are less useful when it comes to building runtime logic (i.e. actually validating a data input passed to a function, for example).
 For these reasons, developers sometimes tend to duplicate the data structure definition to accommodate different use cases, or rely on libraries that are more specialised and less versatile than a <em>dumb</em> serialisable format like json.</p>
-<p>The good news, is that you can use libraries to infer types from a JSON schema. Let’s see how we can define with a JSON schema, the API of the command we developed in the <a href="/posts/separation-of-concerns">previous article</a></p>
+<p>The good news, is that you can use libraries to infer types from a JSON schema. If you paid attention to the schema definiton in the introduction, you should have noticed that it <code>satisfies</code> a JSON schema. This gives you auto-completion when writing your schema, and makes sure you don’t have any syntax errors.
+We can also use the <code>FromSchema</code> from the same <a href="https://github.com/thomasaribart/json-schema-to-ts">json-schema-to-ts library</a> to infer the definition of the commands.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{</span>JSONSchema<span class="token punctuation">,</span> FromSchema<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'json-schema-to-ts'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">CommandsDef<span class="token operator">&lt;</span>Schema <span class="token keyword">extends</span> JSONSchema<span class="token operator">></span></span> <span class="token operator">=</span> FromSchema<span class="token operator">&lt;</span>Schema<span class="token operator">></span> <span class="token keyword">extends</span> <span class="token punctuation">{</span>
+    commands<span class="token operator">:</span> <span class="token keyword">infer</span> Commands
+<span class="token punctuation">}</span> <span class="token operator">?</span> Commands <span class="token operator">:</span> <span class="token builtin">never</span><span class="token punctuation">;</span></code></pre>
+<p>In the same way, we can go further and express the command signature (assuming for the moment, the output is always <code>void</code>):</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">type</span> <span class="token class-name">CommandInput<span class="token operator">&lt;</span>Schema <span class="token keyword">extends</span> JSONSchema<span class="token punctuation">,</span> Name <span class="token keyword">extends</span> <span class="token keyword">keyof</span> CommandsDef<span class="token operator">&lt;</span>Schema<span class="token operator">>></span></span> <span class="token operator">=</span> CommandsDef<span class="token operator">&lt;</span>Schema<span class="token operator">></span><span class="token punctuation">[</span>Name<span class="token punctuation">]</span> <span class="token keyword">extends</span> <span class="token punctuation">{</span>
+    input<span class="token operator">:</span> <span class="token keyword">infer</span> Input
+<span class="token punctuation">}</span> <span class="token operator">?</span> Input <span class="token operator">:</span> <span class="token builtin">never</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">CommandFn<span class="token operator">&lt;</span>Schema <span class="token keyword">extends</span> JSONSchema<span class="token punctuation">,</span> Name <span class="token keyword">extends</span> <span class="token keyword">keyof</span> CommandsDef<span class="token operator">&lt;</span>Schema<span class="token operator">>></span></span> <span class="token operator">=</span> 
+    <span class="token punctuation">(</span>input<span class="token operator">:</span> CommandInput<span class="token operator">&lt;</span>Schema<span class="token punctuation">,</span> Name<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span></code></pre>
+<p>As you can see in the animation below, you can now explicitly say that a function is an implementation of the command defined by the schema, and you will get a compilation error if you change either the function signature, or the schema without reflecting the change in a compatible way.</p>
+<figure>
+    <video controls>
+    <source src="/posts/schema-first-design/transfer-money-devx.mp4" />
+    </video>
+    <figcaption>Dev experience with type inference</figcaption>
+</figure>
 
 </main>
 <footer class="wide" id="main-footer">
