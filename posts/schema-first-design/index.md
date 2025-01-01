@@ -68,7 +68,7 @@ const schema = {
 I invite you to go through the [JSON schema documentation](https://json-schema.org) for more details on the syntax. But, even without that knowledge, you can 
 understand the overall schema definition with some fields being informative(description, title, etc.) and others being declarative of the data contracts.  
 
-The syntax seems a bit verbose, but it brings a lot of flexibility and power as we will soon see. You could anyway avoid some boilerplate by generating the schema on the fly based on a record of command name/command input schema, for example.
+The syntax seems a bit verbose, but it brings a lot of flexibility and power as we will soon see. You could anyway avoid some boilerplate by generating the schema on the fly based on a record of command name/command input schema, or use any of your favourite IDE extensions that help with JSON schemas.
 
 ### Runtime behaviour
 
@@ -136,7 +136,7 @@ That's great, but let's see how we can improve the developer experience even fur
 In the Javascript ecosystem, [Typescript](https://www.typescriptlang.org/), which brings static typing to Javascript, has also become a popular tool for describing data structures and enforcing their consistency throughout the software stack. However, types disappear at runtime and are less useful when it comes to building runtime logic (i.e. actually validating a data input passed to a function, for example).
 For these reasons, developers sometimes tend to duplicate the data structure definition to accommodate different use cases, or rely on libraries that are more specialised and less versatile than a *dumb* serialisable format like json.
 
-The good news, is that you can use libraries to infer types from a JSON schema. If you paid attention to the schema definiton in the introduction, you should have noticed that it ``satisfies`` a JSON schema. This gives you auto-completion when writing your schema, and makes sure you don't have any syntax errors.
+The good news, is that you can use libraries to infer types from a JSON schema. If you paid attention to the schema definition in the introduction, you should have noticed that it ``satisfies`` a JSON schema. This gives you auto-completion when you write your schema, and makes sure you don't have any syntax errors.
 We can also use the ``FromSchema`` from the same [json-schema-to-ts library](https://github.com/thomasaribart/json-schema-to-ts) to infer the definition of the commands.
 
 ```typescript
@@ -147,7 +147,7 @@ type CommandsDef<Schema extends JSONSchema> = FromSchema<Schema> extends {
 } ? Commands : never;
 ```
 
-In the same way, we can go further and express the command signature (assuming for the moment, the output is always ``void``): 
+In the same way, we can go further and express the command signature (assuming for the moment, that the output is always ``void``): 
 
 ```ts
 type CommandInput<Schema extends JSONSchema, Name extends keyof CommandsDef<Schema>> = CommandsDef<Schema>[Name] extends {
@@ -167,7 +167,7 @@ As you can see in the animation below, you can now explicitly say that a functio
     <figcaption>Dev experience with type inference</figcaption>
 </figure>
 
-Again, we can include these new opinions on how to properly develop an API, directly into the framework. 
+Again, we can incorporate these new views on how to properly develop an API, directly into the framework. 
 
 ```ts
 import {ProviderFn} from 'dismoi';
@@ -186,9 +186,9 @@ declare function defineModule<
 }): ProviderFn<Injectables & CommandInjectables<Schema>, (keyof CommandInjectables<Schema>)[]>
 ```
 
-There are now even less moving parts:
-* one must include an implementation for each command defined on the schema
-* one cannot include a command implementation if there is no matching definition on the schema
+There are now even fewer moving parts:
+* you must include an implementation for each command defined on the schema
+* you cannot include a command implementation if there is no matching definition on the schema
 * implementation interfaces must be compatible with the defined API
 
 <figure>
@@ -200,5 +200,11 @@ There are now even less moving parts:
 
 ### Conclusion
 
-The schema has become the central piece of our module.
+The schema has become the centerpiece of our module bringing a strong consistency between the contract and the implementation. Even better, it tailors 
+the dev experience, forcing the developers to follow team conventions and quality standards (data validation is mandatory, for example).
+Yet, we have barely scratched the surface: we could use the schema to automatically generate documentation,a client library, or even test cases. Similarly, we have only used the notion of *commands*, 
+but we could also add to the API definition output format, error that can be thrown, events that can be raised, etc.  
+If you wish to experiment on your own, you can start by forking the following [stackblitz]()
+
+
 
