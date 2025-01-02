@@ -4,7 +4,7 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2024-12-07T00:00:00Z</updated>
+  <updated>2025-01-02T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
@@ -12,7 +12,7 @@
   </author><entry>
     <title>Schema first design</title>
     <link href="https://lorenzofox.dev/posts/schema-first-design/"/>
-    <updated>2024-12-07T00:00:00Z</updated>
+    <updated>2025-01-02T00:00:00Z</updated>
     <id>https://lorenzofox.dev/posts/schema-first-design/</id>
     <content xml:lang="en" type="html">&lt;p&gt;
 There are several development methodologies that focus on first defining a contract (or an expected behaviour), for the software component under development: (&lt;a href=&quot;https://swagger.io/resources/articles/adopting-an-api-first-approach/&quot;&gt;API first design&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/Test-driven_development&quot;&gt;test-driven development&lt;/a&gt;, etc.). In this article, we will see how using a &lt;a href=&quot;https://json-schema.org/&quot;&gt;JSON schema&lt;/a&gt; to define your API can bring consistency to your software and improve its overall quality.

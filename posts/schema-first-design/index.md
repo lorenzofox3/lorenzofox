@@ -1,6 +1,6 @@
 ---
 title: Schema first design
-date: 2024-12-07
+date: 2025-01-02
 description: Describes how to use a JSON schema to define the API of a software component and improve both the development cycle and the quality of the code. 
 ---
 
