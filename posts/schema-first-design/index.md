@@ -203,8 +203,7 @@ There are now even fewer moving parts:
 The schema has become the centerpiece of our module bringing a strong consistency between the contract and the implementation. Even better, it tailors 
 the dev experience, forcing the developers to follow team conventions and quality standards (data validation is mandatory, for example).
 Yet, we have barely scratched the surface: we could use the schema to automatically generate documentation,a client library, or even test cases. Similarly, we have only used the notion of *commands*, 
-but we could also add to the API definition output format, error that can be thrown, events that can be raised, etc.  
-If you wish to experiment on your own, you can start by forking the following [stackblitz]()
+but we could also add the API definition output format, error that can be thrown, events that can be raised, etc.  
 
 
 
