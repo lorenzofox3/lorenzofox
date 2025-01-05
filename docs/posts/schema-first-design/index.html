@@ -179,6 +179,7 @@ What’s left is to map the command input schema and the command factory togethe
 <li>The API can’t change without the schema being updated and vice versa, which somehow enforces keeping the documentation inline with the behaviour.</li>
 <li>All our commands run inside a transaction (see previous post)</li>
 </ol>
+<p>An important point to note is that just as the <code>withinTransactionDecorator</code> allowed the developer not to worry about the transactional behaviour while developing their functionality (i.e. the command), the <code>withValidationDecorator</code> gives them data validation at no cost(no need to modify the functional code), as long as they define the data contract inside the schema!</p>
 <p>That’s great, but let’s see how we can improve the developer experience even further by using Typescript</p>
 <h3 id="developer-experience" tabindex="-1"><a class="header-anchor" href="#developer-experience">Developer experience</a></h3>
 <p>In the Javascript ecosystem, <a href="https://www.typescriptlang.org/">Typescript</a>, which brings static typing to Javascript, has also become a popular tool for describing data structures and enforcing their consistency throughout the software stack. However, types disappear at runtime and are less useful when it comes to building runtime logic (i.e. actually validating a data input passed to a function, for example).

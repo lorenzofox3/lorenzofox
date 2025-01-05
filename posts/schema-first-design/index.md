@@ -129,6 +129,8 @@ Nothing fancy here. We can then compose with the former ``withinTransactionDecor
 2. The API can't change without the schema being updated and vice versa, which somehow enforces keeping the documentation inline with the behaviour.
 3. All our commands run inside a transaction (see previous post)
 
+An important point to note is that just as the ``withinTransactionDecorator`` allowed the developer not to worry about the transactional behaviour while developing their functionality (i.e. the command), the ``withValidationDecorator`` gives them data validation at no cost(no need to modify the functional code), as long as they define the data contract inside the schema!
+
 That's great, but let's see how we can improve the developer experience even further by using Typescript
 
 ### Developer experience
