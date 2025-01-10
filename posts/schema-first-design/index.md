@@ -82,25 +82,44 @@ import Ajv from 'ajv';
 
 const ajv = new Ajv();
 
-export const defineModule = ({commands, schema, injectables}) => {
+function defineCommands({ commands, schema, injectables }) {
     ajv.addSchema(schema);
-    const commandListFromSchema = Object.keys(schema.properties.commands.properties);
+    const commandListFromSchema = Object.keys(
+        schema.properties.commands.properties,
+    );
     const commandListFromImplementation = Object.keys(commands);
-    const symmetricDifference = new Set(commandListFromImplementation).symmetricDifference(new Set(commandListFromSchema));
-    assert(symmetricDifference.size === 0, `discrepancy between schema and implementation: [${[...symmetricDifference]}]`)
+    const symmetricDifference = new Set(
+        commandListFromImplementation,
+    ).symmetricDifference(new Set(commandListFromSchema));
+    assert(
+        symmetricDifference.size === 0,
+        `discrepancy between schema and implementation: [${[...symmetricDifference]}]`,
+    );
 
-    const commandWithValidation = _.mapValues(commands, (commandFactory, commandName) => {
-        const inputSchema = schema.properties.commands.properties[commandName].properties.input;
-        return withValidationDecorator(commandFactory, inputSchema)
-    });
+    const commandWithinTransaction = mapValues(
+        commands,
+        withinTransactionDecorator,
+    );
+
+    const commandWithValidation = mapValues(
+        commandWithinTransaction,
+        (commandFactory, commandName) => {
+            const inputSchema =
+                schema.properties.commands.properties[commandName].properties.input;
+            return withValidationDecorator(commandFactory, inputSchema);
+        },
+    );
 
     const _injectables = {
         ...injectables,
-        ..._.mapValues(commandWithValidation, withinTransactionDecorator)
+        ...commandWithValidation,
     };
 
-    return createProvider({injectables: _injectables, api: Object.keys(commands)});
-};
+    return createProvider({
+        injectables: _injectables,
+        api: Object.keys(commands),
+    });
+}
 ```
 
 Now, the function ``defineModule`` takes a schema as a parameter. We start by adding the schema to the ``ajv`` singleton so that we can reference the main schema in the ``$ref`` clauses (in practice, this, should be done slightly differently if you want to be able to reference completely different schemas,e.g. coming from different modules).
@@ -175,23 +194,35 @@ Again, we can incorporate these new views on how to properly develop an API, dir
 import {ProviderFn} from 'dismoi';
 
 type CommandInjectables<Schema extends JSONSchema> = {
-    [CommandName in keyof CommandsDef<Schema>]: (deps: any) => CommandFn<Schema, CommandName>
-}
+    [CommandName in keyof CommandsDef<Schema>]: (
+        deps: any,
+    ) => CommandFn<Schema, CommandName>;
+};
 
-declare function defineModule<
+/**
+ * A utility type to ensure two types are exactly the same (no extra fields).
+ */
+type Exact<T, U> = T extends U ? (U extends T ? T : never) : never;
+
+/**
+ * Function to define commands, ensuring that the commands match the expected schema.
+ */
+export declare function defineCommands<
     Schema extends JSONSchema,
-    Injectables extends Record<string, unknown>
+    Injectables extends Record<string, unknown>,
+    Commands extends CommandInjectables<Schema>,
 >(input: {
     schema: Schema;
-    commands: CommandInjectables<Schema>;
-    injectables: Injectables
-}): ProviderFn<Injectables & CommandInjectables<Schema>, (keyof CommandInjectables<Schema>)[]>
+    commands: Exact<Commands, CommandInjectables<Schema>>; // Enforce strict matching
+    injectables: Injectables;
+}): ProviderFn<Injectables & Commands, (keyof CommandInjectables<Schema>)[]>;
 ```
 
 There are now even fewer moving parts:
 * you must include an implementation for each command defined on the schema
 * you cannot include a command implementation if there is no matching definition on the schema
 * implementation interfaces must be compatible with the defined API
+* and (provided by ``dismoi``), your dependency graph must be fulfilled
 
 <figure>
     <video controls>
@@ -204,8 +235,9 @@ There are now even fewer moving parts:
 
 The schema has become the centerpiece of our module bringing a strong consistency between the contract and the implementation. Even better, it tailors 
 the dev experience, forcing the developers to follow team conventions and quality standards (data validation is mandatory, for example).
-Yet, we have barely scratched the surface: we could use the schema to automatically generate documentation,a client library, or even test cases. Similarly, we have only used the notion of *commands*, 
+Yet, we have barely scratched the surface: we could use the schema to automatically generate documentation, a client library, or even test cases. Similarly, we have only used the notion of *commands*, 
 but we could also add the API definition output format, error that can be thrown, events that can be raised, etc.  
+If you wish to see the source code, you can refer to [this repository](https://github.com/lorenzofox3/backend-framework)
 
 
 
