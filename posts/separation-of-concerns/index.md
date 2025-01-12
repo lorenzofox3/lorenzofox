@@ -43,7 +43,7 @@ export const createTransferMoneyCommand =
 
             // ... some other business rules
 
-            const newToBalance = fromAccount.balance + amount;
+            const newToBalance = toAccount.balance + amount;
             const newFromBalance = fromAccount.balance - amount;
 
             return Promise.all([
