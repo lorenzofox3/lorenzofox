@@ -4,12 +4,20 @@
   <subtitle>Software Engineering, Javascript, and more</subtitle>
   <link href="https://lorenzofox.dev/feed.xml" rel="self"/>
   <link href="https://lorenzofox.dev"/>
-  <updated>2025-01-02T00:00:00Z</updated>
+  <updated>2025-02-10T00:00:00Z</updated>
   <id>https://lorenzofox.dev</id>
   <author>
     <name>Laurent RENARD</name>
     <email>laurent34azerty@gmail.com</email>
   </author><entry>
+    <title>Pub/Sub with Postgres logical replication and Nodejs</title>
+    <link href="https://lorenzofox.dev/posts/pub-sub-pg-logical-replication/"/>
+    <updated>2025-02-10T00:00:00Z</updated>
+    <id>https://lorenzofox.dev/posts/pub-sub-pg-logical-replication/</id>
+    <content xml:lang="en" type="html">&lt;p&gt;
+Pub/Sub is a common pattern for distributed - or not - systems. It provides the ability to reduce the coupling between the event producer on one side and the event consumer on the other. We often associate this pattern with event streaming technologies such as Kafka, but this does not have to be the case: Postgres can help you achieve decent scalability, depending on the use case.
+&lt;/p&gt;</content>
+  </entry><entry>
     <title>Schema first design</title>
     <link href="https://lorenzofox.dev/posts/schema-first-design/"/>
     <updated>2025-01-02T00:00:00Z</updated>

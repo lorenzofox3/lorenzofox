@@ -52,6 +52,7 @@ canvas {
     --accent: #1c5aab;
     --orange: #f27e2c;
     --shadow-color: #777777;
+    --aside-color:#c0e5f1;
 
     --secondary-color: #31363b;
     --secondary-font-color: #eeeeee;
@@ -71,7 +72,7 @@ body {
 figure {
     margin-block: 1em;
 
-    > img, video {
+    > img, video, table {
         box-shadow: 0 0.25em 0.4em 0 var(--shadow-color);
     }
 
@@ -84,11 +85,18 @@ figure {
 
 table {
     border-collapse: collapse;
+    width: 100%;
+    font-size: 0.8em;
 }
 
 td, th {
     border: 1px solid currentColor;
     text-align: center;
+}
+
+tr:nth-child(2n) {
+    background: var(--secondary-color);
+    color: white;
 }
 
 
@@ -100,11 +108,11 @@ td, th {
         --accent: #96bffa;
         --mix: #ffffff;
 
-        --secondary-color: #222528;
+        --aside-color:#5a747c;
+        --secondary-color: #4b5f65;
         --secondary-font-color: #eeeeee;
         --shadow-color: #151515;
         --orange: #ae5110;
-
     }
 }
 
@@ -255,6 +263,14 @@ main {
 
 p {
     margin-block: 1em;
+}
+
+aside {
+    background: var(--aside-color);
+    padding: 0.5em;
+    border-radius: 5px;
+    font-size: 0.9em;
+    border: 1px solid var(--shadow-color);
 }
 
 :where(h2, h3, h4, h5) {
@@ -424,6 +440,7 @@ pre[class*="language-"] {
 .token.bold {
     font-weight: bold;
 }
+
 .token.italic {
     font-style: italic;
 }
