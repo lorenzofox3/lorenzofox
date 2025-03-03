@@ -497,7 +497,7 @@ On the other hand, the database is running in a Docker container on an old machi
 
 This means that before Postgres becomes the bottleneck of the system, the business will probably be quite profitable and we should be able to hire a better architect than me :)!
 
-If you wish to run your own simulations you can use [this repository]() as base project
+If you wish to run your own simulations you can use [this repository](https://github.com/lorenzofox3/pubsub-pg-logical-replication) as base project
 
 ## Conclusion
 

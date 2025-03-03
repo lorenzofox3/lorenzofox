@@ -552,7 +552,7 @@ The replication does not lag behind the production of the events and the WAL can
 </ul>
 <p>On the other hand, the database is running in a Docker container on an old machine (MacBook Pro early 2015 - 2.7 GHz Dual-Core Intel Core i5 - 8 GB RAM) and could easily handle the expected load without any special tuning.</p>
 <p>This means that before Postgres becomes the bottleneck of the system, the business will probably be quite profitable and we should be able to hire a better architect than me :)!</p>
-<p>If you wish to run your own simulations you can use <a href="">this repository</a> as base project</p>
+<p>If you wish to run your own simulations you can use <a href="https://github.com/lorenzofox3/pubsub-pg-logical-replication">this repository</a> as base project</p>
 <h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>Postgres (and NodeJS) once again proved to be a versatile tool, allowing us to implement a robust pub/sub system with very little effort (none on the publishing side!).
 We have set up the basics of a protocol to see if this can be scaled up sufficiently.
