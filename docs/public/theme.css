@@ -71,6 +71,7 @@ body {
 
 figure {
     margin-block: 1em;
+    overflow-x: scroll;
 
     > img, video, table {
         box-shadow: 0 0.25em 0.4em 0 var(--shadow-color);
