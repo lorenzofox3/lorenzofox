@@ -305,6 +305,8 @@ a {
     background: var(--_color, lightgray);
     padding-inline: 0.25em;
     font-size: 0.9em;
+    border-radius: .3em;
+    white-space: normal;
 }
 
 .icon {
@@ -360,19 +362,7 @@ pre[class*="language-"] {
 /* Code blocks */
 pre[class*="language-"] {
     overflow: auto;
-    border-radius: 0.3em;
-}
-
-:not(pre) > code[class*="language-"],
-pre[class*="language-"] {
     background: #292b24;
-}
-
-/* Inline code */
-:not(pre) > code[class*="language-"] {
-    padding: .1em;
-    border-radius: .3em;
-    white-space: normal;
 }
 
 .token.comment,

@@ -1,7 +1,7 @@
 ---
 title: Pub/Sub with Postgres logical replication and Nodejs
 description: Thoughts on implementing pub/sub with postgres logical replication and Nodejs
-date: 2025-02-10
+date: 2025-03-11
 ---
 
 <div class="intro"> 
